@@ -1,0 +1,89 @@
+SENSOR TO IMAGE GMBH - SOFTWARE LICENSE AGREEMENT - EVALUATION ONLY
+
+BY DOWNLOADING, COPYING, INSTALLING, OR USING THE SOFTWARE, LICENSEE AGREES TO THE TERMS OF THIS AGREEMENT.
+IMPORTANT - READ BEFORE DOWNLOADING, COPYING, INSTALLING, OR USING.
+DO NOT USE OR INSTALL THIS SOFTWARE UNTIL YOU (THE "LICENSEE") HAVE CAREFULLY READ THE FOLLOWING TERMS AND CONDITIONS. BY DOWNLOADING, COPYING, INSTALLING, OR USING THE SOFTWARE, YOU AGREE TO THE TERMS OF THIS AGREEMENT. IF YOU DO NOT WISH TO SO AGREE, DO NOT DOWNLOAD, COPY, INSTALL, OR USE THE SOFTWARE.
+
+1. BACKGROUND
+This Software Evaluation Agreement ("Agreement") is entered into between SENSOR TO IMAGE GMBH with principal offices located at Lechtorstrasse 20, Schongau 86956 in Germany and the party which has accepted these terms ("USER"), by installing or using the SENSOR TO IMAGE GMBH proprietary Software accompanied by this Agreement ("Software").
+
+2. GRANT OF EVALUATION LICENSE
+SENSOR TO IMAGE GMBH grants to USER, and USER hereby accepts, under the terms and conditions of this Agreement, a royalty free, non-transferable and non-exclusive license to use the Software internally with Xilinx SOM Starter Kits for the exclusive purposes of testing, analyzing, and evaluating the Software in order to the assess the opportunity of entering into a business relationship with Sensor to Image GmbH or to acquire products and Software.
+
+3. SHIPMENT AND INSTALLATION
+USER is responsible for the download and installation of the Software. No support, nor documentation other that what is publicly available online, shall be provided.
+
+4. EVALUATION TERM
+The Agreement becomes effective on the day of the download of the Software and shall run for thirty (30) days. Upon expiration of said term, the Agreement shall terminate automatically without any notice or further action being required.
+When the License Term expires, USER’s license rights also expire and USER may no longer use the Licensed Software Product, except as otherwise expressly agreed by the Parties. USER shall destroy the Licensed Software Product(s), including all copies and derivative works, and all related documentation.
+
+5. TERMINATION
+SENSOR TO IMAGE GMBH may terminate the Agreement or suspend its own obligations at any time and without notice or any compensation to USER, as of right and without prior notice:
+If USER fails to fulfil one of its contractual obligations or if it turns out that he will fail or if there is a risk that he will fail to fulfil one of its obligations, even if this happens before this obligation is due to be fulfilled;
+In the event of incapacity, bankruptcy, insolvency, inability to make payments, a request to defer payment, voluntary or compulsory judicial reorganization or any other event demonstrating USER's financial difficulties;
+If SENSOR TO IMAGE GMBH ceases trading or makes substantial changes to its professional activities;
+In the event of an instance of force majeure which lasts for more than 6 months.
+
+6. LIMITATIONS OF LIABILITY AND DISCLAIMERS
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, SENSOR TO IMAGE GMBH DISCLAIMS ALL WARRANTIES AND REPRESENTATIONS, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF NON-INFRINGEMENT OF THIRD-PARTY RIGHTS, MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. 
+EXCEPT FOR WHAT IS SPECIFIED IN WRITING IN THE AGREEMENT BETWEEN THE PARTIES, SENSOR TO IMAGE GMBH MAKES NO WARRANTY OR REPRESENTATION THAT THE FUNCTIONS CONTAINED IN THE TANGIBLE PRODUCTS, THE SOFTWARE AND SERVICES WILL MEET ANY OTHER USER'S REQUIREMENTS, THAT THE TANGIBLE PRODUCTS AND SOFTWARE WILL OPERATE PROPERLY IN COMBINATION WITH OTHER FUNCTIONALITY, IP CORES, SOFTWARE OR PROTOCOLS, OR THAT THE OPERATION OF THE TANGIBLE PRODUCTS AND THE SOFTWARE WILL BE UNINTERRUPTED OR ERROR-FREE, OR THAT ALL ERRORS OR DEFECTS IN THE TANGIBLE PRODUCTS AND SOFTWARE ARE CAPABLE OF BEING CORRECTED.
+USE OF THE TANGIBLE PRODUCTS AND THE LICENSED SOFTWARE PRODUCT IS UNDERSTOOD TO BE FULLY AT USER'S RISK.
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW: 
+(1) IN NO EVENT SHALL SENSOR TO IMAGE GMBH OR ITS SENSOR TO IMAGE GMBHS BE LIABLE FOR ANY LOSS OF DATA OR SOFTWARE, LOSS OF USE, SLOWDOWN OR INTERRUPTION OF ACTIVITY OR EQUIPMENT, LOST PROFITS, LOST ORDERS, LOST SALES, LOSS OF GOODWILL, LOST SAVINGS, LOSS OF PRODUCTION, LOSS OF PRIVACY, PERSONAL INJURY, PECUNIARY OR OTHER LOSS, OR COST OF PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, OR FOR ANY SPECIAL, EXEMPLARY, INCIDENTAL, CONSEQUENTIAL OR INDIRECT DAMAGES ARISING UNDER, RELATED TO, OR IN CONNECTION WITH THE AGREEMENT OR THE USE OR OPERATION OF THE TANGIBLE PRODUCTS AND SOFTWARE, IN WHOLE OR IN PART, HOWEVER CAUSED AND UNDER ANY THEORY OF LIABILITY;
+(2) IN NO EVENT SHALL THE ENTIRE LIABILITY OF SENSOR TO IMAGE GMBH OR ITS SENSOR TO IMAGE GMBHS ARISING UNDER, RELATED TO, OR IN CONNECTION WITH THE AGREEMENT, EXCEED THE FEES OF THE SERVICES PROVIDED OR THE PRICE OF THE TANGIBLE PRODUCTS OR THE AMOUNT OF LICENSE FEES RECEIVED BY SENSOR TO IMAGE GMBH FROM USER FOR THE APPLICABLE SOFTWARE GIVING RISE TO SUCH LIABILITY;
+(3) THESE LIMITATIONS AND EXCLUSIONS SHALL APPLY REGARDLESS OF WHETHER SUCH LOSS WAS REASONABLY FORESEEABLE OR IF SENSOR TO IMAGE GMBH HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES; AND
+(4) THESE LIMITATIONS SHALL APPLY NOTWITHSTANDING THE FAILURE OF THE ESSENTIAL PURPOSE OF ANY LIMITED REMEDIES HEREIN. 
+NOTWITHSTANDING ANY OTHER PROVISION OF THE AGREEMENT, NEITHER PARTY EXCLUDES OR LIMITS ITS LIABILITY IN ANY WAY FOR ANY MATTER THAT CANNOT, AS A MATTER OF IMPERATIVE APPLICABLE LAW, BE LIMITED OR EXCLUDED. THE PARTIES AGREE THAT THIS SECTION (LIMITATION OF LIABILITY) REPRESENTS AN ALLOCATION OF RISK WHICH THE PARTIES CONSIDER REASONABLE.
+
+7. OPEN SOURCE AND THIRD-PARTY SOFTWARE
+USER ACKNOWLEDGES THAT USE OF THE SOFTWARE IN COMBINATION WITH OTHER FUNCTIONALITY, IP CORES, SOFTWARE OR PROTOCOLS MAY REQUIRE LICENSES FROM THIRD PARTIES AND USER ACCEPTS SOLE RESPONSIBILITY FOR OBTAINING SUCH LICENSES.
+USER AGREES THAT ALL OPEN SOURCE SOFTWARE SHALL BE AND SHALL REMAIN SUBJECT TO THE TERMS AND CONDITIONS UNDER WHICH IT IS PROVIDED. THE OPEN SOURCE SOFTWARE IS PROVIDED "AS IS," WITHOUT ANY WARRANTY OF ANY KIND, AND SENSOR TO IMAGE GMBH FURTHER DISCLAIMS ALL OTHER WARRANTIES, EXPRESS, IMPLIED OR STATUTORY, WITH RESPECT TO OPEN SOURCE SOFTWARE, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF NONINFRINGEMENT, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. NEITHER SENSOR TO IMAGE GMBH NOR THE SENSOR TO IMAGE GMBHS OF OPEN SOURCE SOFTWARE SHALL HAVE ANY LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING WITHOUT LIMITATION LOST PROFITS), HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN AGREEMENT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OR DISTRIBUTION OF THE OPEN SOURCE SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. COPYRIGHTS TO THE OPEN SOURCE SOFTWARE ARE HELD BY THE COPYRIGHT HOLDERS INDICATED IN THE COPYRIGHT NOTICES IN THE CORRESPONDING SOURCE FILES.
+
+8. INTELLECTUAL PROPERTY RIGHTS
+Without prejudice of what is provided for by the Agreement and any applicable mandatory provisions, SENSOR TO IMAGE GMBH is and shall remain the exclusive and entire owner and/or beneficiary of any present or future intellectual right whatsoever (including but not limited to copyrights, neighboring rights, moral rights, and all derivative works thereof) related to any tangible product, Software or solution conceived, developed and/or provided by SENSOR TO IMAGE GMBH, including their applications, programs, algorithms, related documents, manuals and written materials, successive releases, updates, upgrades, developments or improvements, trade secret, icons, graphics, logos, trademarks and trade name rights and similar rights, illustrations, images, photographs, animations, videos, audios, texts, no matter if they are or not protected anyhow, no matter if they are customized or not, no matter from whom the ideas for enhancements is from, no matter whom has developed it. 
+Nothing in the Agreement shall be construed as a waiver of such rights.
+Nothing contained in the Agreement will be construed as conferring by implication, estoppel or otherwise upon USER any license or other right, except the licenses and rights expressly granted to USER.
+USER shall immediately notify to SENSOR TO IMAGE GMBH any unauthorized, improper or wrongful use or treatment of any SENSOR TO IMAGE GMBH's intellectual and industrial property rights, whether registered or not, and shall give to SENSOR TO IMAGE GMBH the assistance SENSOR TO IMAGE GMBH may require to protect its intellectual and industrial property rights.
+In the event that any third party claims to hold any intellectual rights owned by SENSOR TO IMAGE GMBH, USER and SENSOR TO IMAGE GMBH shall cooperate to defend SENSOR TO IMAGE GMBH' rights. USER hereby agrees to abandon any claim or recourse against SENSOR TO IMAGE GMBH on such matter.
+This obligation hereinabove set forth shall survive cancellation, termination or nullity of the Agreement for any reason whatsoever and shall continue to apply for an unlimited period of time. 
+
+9. CONFIDENTIALITY
+Except as otherwise expressly permitted in the Agreement, USER shall maintain the confidentiality of the Software and all other information received hereunder from SENSOR TO IMAGE GMBH.
+USER agrees that the Tangible Products, the Software and Documentation furnished hereunder will be treated as proprietary trade secrets of SENSOR TO IMAGE GMBH, and USER will not make them available in any form to any person other than to its employees and to contractors working on its premises with a genuine "need to know" for purposes authorized by the Agreement, and who are bound by obligations of confidentiality no less protective of SENSOR TO IMAGE GMBH than those contained herein.
+USER represents to SENSOR TO IMAGE GMBH that it maintains a system of confidentiality consistent with industry standards to protect its own confidential business information, including written agreements with employees, and that the Tangible Products, the Software and Documentation will be protected by such a system to the same extent.
+USER agrees that a breach of confidentiality may result in irreparable and continuing damage to SENSOR TO IMAGE GMBH for which there may be no adequate remedy at law, and SENSOR TO IMAGE GMBH shall be entitled to seek injunctive relief and/or a decree for specific performance, and such other relief (including monetary damages) as may be proper.
+The obligations of confidentiality under the Agreement shall not apply to information that:
+(a) is already known to USER at the time of disclosure without obligation of confidentiality;
+(b) is or becomes publicly known through no wrongful act or omission of USER;
+(c) is rightfully received by USER from a third party without obligation of confidentiality;
+(d) is approved for release by written authorization of SENSOR TO IMAGE GMBH; or
+(e) was developed by USER independently and without the use or benefit of the Tangible Products, the Software and/or the Documentation.
+This obligation hereinabove set forth shall survive cancellation, termination or nullity of the Agreement for any reason whatsoever and shall continue to apply for an unlimited period of time. 
+
+10. ASSIGNMENT
+USER may not assign the Agreement or transfer any of the rights or obligations under the Agreement, in whole or in part, in any manner (by assignment, operation of law or otherwise), to any third party/ies without the prior written consent of SENSOR TO IMAGE GMBH.
+
+11. WAIVER
+No waiver, express or implied, by either party of any right or remedy for any breach by the other party of any provision of the Agreement will be deemed or construed to be a waiver of any succeeding breach of such provision or as a waiver of the provision itself or of any other breach or provision. No waiver of or modification or amendment to the Agreement will be effective unless reduced to writing and executed by authorized representatives of the parties.
+
+12. SEVERABILITY
+If any provision of the Agreement is found unenforceable, illegal, void or invalid in whole or in part, then it shall to that extent be deemed not to form part of the Agreement and the remainder of the Agreement will remain in full force and effect. The parties shall in such an event be obliged to cooperate in the creation of terms which achieve such legally valid result as comes closest commercially to that of the invalid provision. This shall apply accordingly to the closing of any gaps in the Agreement.
+
+13. ENTIRE AGREEMENT
+The Agreement represents and constitutes the entire agreement between the parties with respect to the Licensed Software Product(s), and supersedes all prior or contemporaneous discussions, representations, arrangements, understandings or agreements, written or oral, regarding the subject matter hereof. No additional terms or modifications proposed by USER shall be binding on SENSOR TO IMAGE GMBH unless expressly agreed to in writing by SENSOR TO IMAGE GMBH.
+
+14. INTERPRETATION
+By accepting anyhow or signing the Agreement, USER acknowledges and agrees that it has read and understood the Agreement, has had an opportunity to discuss the Agreement with its legal and other advisors, and agrees to be bound by the terms and conditions of the Agreement. The Agreement shall be interpreted fairly in accordance with its terms and without any strict construction in favor of or against either party.
+
+15. COMPLIANCE WITH EXPORT CONTROL REGULATIONS
+USER shall comply with all applicable national and international export control laws and with any regulations issued by the U.S. Department of Commerce and similar agencies concerning exporting, importing and re-exporting the Software. In particular, USER will pass on the requirements imposed by this article to its distribution channels, and incorporate them in its own terms for licensing.
+If required to enable authorities or SENSOR TO IMAGE GMBH  to conduct export control checks, USER, upon request by SENSOR TO IMAGE GMBH, shall promptly provide SENSOR TO IMAGE GMBH  with all information pertaining to the particular end-user, the particular destination and the particular intended use of information, software and documentation provided by SENSOR TO IMAGE GMBH , as well as any export control restrictions existing.
+USER shall indemnify and hold harmless SENSOR TO IMAGE GMBH from and against any claim, proceeding, action, fine, loss, cost and damages arising out of or relating to any noncompliance with export control regulations by USER. USER shall compensate SENSOR TO IMAGE GMBH for all losses and expenses resulting thereof, unless such noncompliance was not caused by fault of USER.
+
+16. DISPUTE SETTLEMENT
+In the case of dispute or conflict between the Parties, they will use their best endeavor to settle or resolve it rapidly, in an amicable way and in good faith.
+If the dispute or conflict is not resolved in an amicable way, the Parties hereby undertake to apply the ICC Rules of Mediation (https://iccwbo.org/dispute-resolution-services/mediation/mediation-rules/) to all disputes arising out of or in relation with the Agreement. The seat of the mediation shall be the closest city from the SENSOR TO IMAGE GMBH's corporate address, unless otherwise agreed in the Agreement. But the Parties can decide to meet through a videoconference system such as Teams. The proceedings shall be conducted in English. 
+Should the mediation fail, the dispute shall be settled in accordance with the Rules of Conciliation and Arbitration of the ICC (https://iccwbo.org/dispute-resolution-services/arbitration/), by one arbitrator designated in conformity with those rules. The arbitration proceedings will be held in the closest city from the SENSOR TO IMAGE GMBH 's corporate address, unless otherwise agreed in the Agreement. But the Parties can decide to meet through a videoconference system such as Teams. The proceedings shall be conducted in English.
+
+17. GOVERNING LAW
+The governing law is the law of Germany and the mediation and arbitration place is Munich.
