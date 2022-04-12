@@ -1,5 +1,6 @@
 /******************************************************************************/
-/*  1 GigE Vision Reference Design                                           */
+/*  10 GigE Vision Reference Design                                           */
+/*  Copyright (c) 2022. Sensor to Image GmbH. All rights reserved.            */
 /*----------------------------------------------------------------------------*/
 /*    File :  main.c                                                          */
 /*    Date :  2022-03-09                                                      */

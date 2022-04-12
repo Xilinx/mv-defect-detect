@@ -1,4 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2022. Sensor to Image GmbH. All rights reserved. -->
 <RegisterDescription ModelName="GVRD"
                      VendorName="Sensor_to_Image"
                      ToolTip="Sensor to Image GigE Vision Reference Design on ZCU102 Board"
