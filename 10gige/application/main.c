@@ -3,8 +3,8 @@
 /*  Copyright (c) 2022. Sensor to Image GmbH. All rights reserved.            */
 /*----------------------------------------------------------------------------*/
 /*    File :  main.c                                                          */
-/*    Date :  2022-03-09                                                      */
-/*     Rev :  0.6                                                             */
+/*    Date :  2022-05-30                                                      */
+/*     Rev :  0.7                                                             */
 /*  Author :  JP                                                              */
 /*----------------------------------------------------------------------------*/
 /*  NBASE-T GigE Vision reference design firmware for ZCU102                  */
@@ -15,6 +15,7 @@
 /*  0.4  |  2021-09-14  |  SS  |  Update to latest core and Vivado 2020.2     */
 /*  0.5  |  2021-10-20  |  RW  |  Ported to linux                             */
 /*  0.6  |  2022-03-09  |  SS  |  Prepared for kr260                          */
+/*  0.7  |  2022-05-30  |  RW  |  Added command line param for network intface*/
 /******************************************************************************/
 #include <stdio.h>
 #include <unistd.h>
@@ -111,6 +112,7 @@ int main(int argc, char* argv[])
 {
     INIT_PARAM init_param;
     u32 help;
+	char interface_name[10];
 
     printf("GVRD\n");
 
@@ -136,7 +138,12 @@ int main(int argc, char* argv[])
     init_param.lib_mode           = DEV_MODE_TX;   // sender
 
     // set network interface name
-    strcpy((char *)init_param.interface_name,"eth0");
+	if(argc == 2)
+		strcpy((char *)interface_name, argv[1]);
+	else
+		strcpy((char *)interface_name, "eth0");
+
+	strcpy((char *)init_param.interface_name, interface_name);
 
     // This callback function must be always implemented!
     // It is called by the libGigE

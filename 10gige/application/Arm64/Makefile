@@ -1,7 +1,7 @@
 # Add any other object files to this list below
 APP_OBJS = main.o user.o flash.o framebuffer.o gendc.o
 
-LIBGIGE = ../../libGigE/Arm64/Release/libGigE.a
+LIBGIGE = ../../libGigE/Arm64/Release/libgigev.so
 
 CFLAGS+=-I../../libGigE
 CFLAGS+=-fPIC
@@ -22,7 +22,7 @@ APPNAME = $(OUTDIR)/gvrd
 all: $(APPNAME)
 
 $(APPNAME): $(APP_OBJS)
-	$(CC) $(LDFLAGS) $(wildcard $(OUTDIR)/*.o) $(LDLIBS) $(LIBGIGE) -o $(APPNAME) -lm -lpthread -lGigE
+	$(CC) $(LDFLAGS) $(wildcard $(OUTDIR)/*.o) $(LDLIBS) $(LIBGIGE) -o $(APPNAME) -lm -lpthread -lgigev
 	cp ../xgvrd-kr260.xml $(OUTDIR)
 	cp start.sh $(OUTDIR)
 
