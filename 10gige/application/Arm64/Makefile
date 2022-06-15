@@ -8,23 +8,29 @@ CFLAGS+=-fPIC
 
 LDFLAGS+=-L../../libGigE/Arm64/Release/
 
-OUTDIR = Release
+OUTDIR = /usr/bin/
+LIBDIR = /usr/lib/
 
 $(shell test -d "$(OUTDIR)" || mkdir -p "$(OUTDIR)" )
 
 APPNAME = $(OUTDIR)/gvrd
 
-
-#all: build install
-#all: build
-
-#build: $(APP)
 all: $(APPNAME)
 
 $(APPNAME): $(APP_OBJS)
 	$(CC) $(LDFLAGS) $(wildcard $(OUTDIR)/*.o) $(LDLIBS) $(LIBGIGE) -o $(APPNAME) -lm -lpthread -lgigev
-	cp ../xgvrd-kr260.xml $(OUTDIR)
-	cp start.sh $(OUTDIR)
+
+install:
+	cp Release/update_eeprom $(OUTDIR)
+	cp Release/eeprom.bin $(OUTDIR)
+	cp Release/update_atable $(OUTDIR)
+	cp Release/zcip $(OUTDIR)
+	cp Release/zcip.script $(OUTDIR)
+	cp Release/alloc_table.bin $(OUTDIR)
+	cp Release/gvrd $(OUTDIR)
+	cp ../../libGigE/Arm64/Release/libgigev.so.2.0.1 $(LIBDIR)
+	ln -sf /usr/lib/libgigev.so.2.0.1 /usr/lib/libgigev.so.2.0
+	ln -sf /usr/lib/libgigev.so.2.0 /usr/lib/libgigev.so
 
 clean:
 	-rm -f $(APP) *.elf *.gdb $(OUTDIR)/*.o
