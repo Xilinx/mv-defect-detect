@@ -3,6 +3,8 @@ APP_OBJS = main.o user.o flash.o framebuffer.o gendc.o
 
 LIBGIGE = ../../libGigE/Arm64/Release/libgigev.so
 
+DESTDIR = /opt/xilinx/xlnx-app-kr260-mv-defect-detect/
+
 CFLAGS+=-I../../libGigE
 CFLAGS+=-fPIC
 

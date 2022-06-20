@@ -23,6 +23,10 @@ sudo v4l2-ctl -d /dev/v4l-subdev0 -c gain=250
 # Wait for previous command to complete
 echo $?
 
+# Configure PPi-Video IP
+sudo /bin/busybox devmem 0xa0030000 32 0x9A8
+sudo /bin/busybox devmem 0xa0030004 32 0x850
+
 # Configure SLVS-EC IP Core
 sudo /bin/busybox devmem 0xa0020000 32 0xa
 sudo /bin/busybox devmem 0xa002000c 32 0x1
