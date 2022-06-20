@@ -8,35 +8,33 @@ CFLAGS+=-fPIC
 
 LDFLAGS+=-L../../libGigE/Arm64/Release/
 
-OUTDIR = /usr/bin/
-LIBDIR = /usr/lib/
+OUTDIR = $(DESTDIR)/usr/bin/
+LIBDIR = $(DESTDIR)/usr/lib/
 
-$(shell test -d "$(OUTDIR)" || mkdir -p "$(OUTDIR)" )
-
-APPNAME = $(OUTDIR)/gvrd
+APPNAME = gvrd
 
 all: $(APPNAME)
 
 $(APPNAME): $(APP_OBJS)
-	$(CC) $(LDFLAGS) $(wildcard $(OUTDIR)/*.o) $(LDLIBS) $(LIBGIGE) -o $(APPNAME) -lm -lpthread -lgigev
+	$(CC) $(LDFLAGS) $(APP_OBJS) $(LDLIBS) $(LIBGIGE) -o $(APPNAME) -lm -lpthread -lgigev
 
 install:
+	mkdir -p "$(OUTDIR)"
 	cp Release/update_eeprom $(OUTDIR)
 	cp Release/eeprom.bin $(OUTDIR)
 	cp Release/update_atable $(OUTDIR)
 	cp Release/zcip $(OUTDIR)
 	cp Release/zcip.script $(OUTDIR)
 	cp Release/alloc_table.bin $(OUTDIR)
-	cp Release/gvrd $(OUTDIR)
-	cp ../../libGigE/Arm64/Release/libgigev.so.2.0.1 $(LIBDIR)
-	ln -sf /usr/lib/libgigev.so.2.0.1 /usr/lib/libgigev.so.2.0
-	ln -sf /usr/lib/libgigev.so.2.0 /usr/lib/libgigev.so
+	cp $(APPNAME) $(OUTDIR)
+	mkdir -p "$(LIBDIR)"
+	cp -a ../../libGigE/Arm64/Release/libgigev.so.2.0.1 $(LIBDIR)
+	cp -a ../../libGigE/Arm64/Release/libgigev.so.2.0 $(LIBDIR)
+	cp -a ../../libGigE/Arm64/Release/libgigev.so $(LIBDIR)
 
 clean:
-	-rm -f $(APP) *.elf *.gdb $(OUTDIR)/*.o
+	-rm -f $(APPNAME) *.elf *.gdb $(APP_OBJS)
 
 %.o: ../%.c
 #	$(CC) -c $(CFLAGS) -o $(OUTDIR)/$@	
-	$(CC) $(CFLAGS) -c $< -o $(OUTDIR)/$@	
-	
-
+	$(CC) $(CFLAGS) -c $< -o $@
