@@ -431,6 +431,10 @@
                 <DisplayName>Mono 10</DisplayName>
                 <Value>0x01100003</Value>
             </EnumEntry>
+            <EnumEntry Name="Mono16" NameSpace="Standard">
+                <DisplayName>Mono 16</DisplayName>
+                <Value>0x01100007</Value>
+            </EnumEntry>
             <pValue>PixelFormatReg</pValue>
         </Enumeration>
     </Group>

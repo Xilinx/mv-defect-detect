@@ -10,8 +10,8 @@ CFLAGS+=-fPIC
 
 LDFLAGS+=-L../../libGigE/Arm64/Release/
 
-OUTDIR = $(DESTDIR)/usr/bin/
-LIBDIR = $(DESTDIR)/usr/lib/
+OUTDIR = $(DESTDIR)/bin/
+LIBDIR = $(DESTDIR)/lib/
 
 APPNAME = gvrd
 
@@ -28,6 +28,9 @@ install:
 	cp Release/zcip $(OUTDIR)
 	cp Release/zcip.script $(OUTDIR)
 	cp Release/alloc_table.bin $(OUTDIR)
+	cp ../xgvrd-kr260.xml $(OUTDIR)
+	cp Release/configure $(OUTDIR)
+	cp ../update_eeprom_wrapper $(OUTDIR)
 	cp $(APPNAME) $(OUTDIR)
 	mkdir -p "$(LIBDIR)"
 	cp -a ../../libGigE/Arm64/Release/libgigev.so.2.0.1 $(LIBDIR)
@@ -38,5 +41,4 @@ clean:
 	-rm -f $(APPNAME) *.elf *.gdb $(APP_OBJS)
 
 %.o: ../%.c
-#	$(CC) -c $(CFLAGS) -o $(OUTDIR)/$@	
 	$(CC) $(CFLAGS) -c $< -o $@

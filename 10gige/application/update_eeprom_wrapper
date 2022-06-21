@@ -14,9 +14,8 @@ trap cleanup EXIT
 
 cd "$tmpdir"
 
-ln -s "$APPDIR/xgvrd-kr260.xml"
-cp "$APPDIR/usr/bin/eeprom.bin" .
-
-"$APPDIR/usr/bin/update_eeprom"
-ln -s "$APPDIR/usr/bin/gvrd"
-$APPDIR/usr/bin/update_atable gvrd
+ln -s $APPDIR/bin/eeprom.bin
+ln -s $APPDIR/bin/xgvrd-kr260.xml
+ln -s $APPDIR/bin/gvrd
+$APPDIR/bin/update_eeprom
+$APPDIR/bin/update_atable gvrd
