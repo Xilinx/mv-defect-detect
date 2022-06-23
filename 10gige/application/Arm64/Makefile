@@ -3,15 +3,15 @@ APP_OBJS = main.o user.o flash.o framebuffer.o gendc.o
 
 LIBGIGE = ../../libGigE/Arm64/Release/libgigev.so
 
-DESTDIR = /opt/xilinx/xlnx-app-kr260-mv-defect-detect/
+prefix = /opt/xilinx/xlnx-app-kr260-mv-defect-detect
 
 CFLAGS+=-I../../libGigE
 CFLAGS+=-fPIC
 
 LDFLAGS+=-L../../libGigE/Arm64/Release/
 
-OUTDIR = $(DESTDIR)/bin/
-LIBDIR = $(DESTDIR)/lib/
+OUTDIR = $(DESTDIR)/$(prefix)/bin/
+LIBDIR = $(DESTDIR)/$(prefix)/lib/
 
 APPNAME = gvrd
 
