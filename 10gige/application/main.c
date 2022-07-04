@@ -35,6 +35,7 @@
 // ---- Global constants and variables -----------------------------------------
 // Operate in GEV 2.x gige_set_gev_version
 #define _GEV_VERSION_2_
+#define LOW_LATENCY 0
 
 static int exit_flag = 0;  /* SIGINT, SIGTERM, SIGQUIT */
 
@@ -172,7 +173,11 @@ int main(int argc, char* argv[])
     gige_set_gev_version(device, 2);                    // GEV 2.x
     gige_force_gev_version(device, 0x00020001);         // Force gev version to 2.1
     // Initialize Framebuffer core
+#if LOW_LATENCY
     init_famebuffer(device, 1, 0, 0, 0x04000000);       // Low latency, progressive-scan, GEV 2.x, buffer size
+#else
+    init_famebuffer(device, 0, 0, 0, 0x04000000);       // Full block mode, progressive-scan, GEV 2.x, buffer size
+#endif
     printf("[UU] Running in GEV 2.1 mode\n");
 #endif
 
