@@ -2,8 +2,12 @@
 
 # Configure the media nodes
 media-ctl -d /dev/media0 -V "\"imx547 7-001a\":0 [fmt:SRGGB10_1X10/1920x1080 field:none @1/60]"
+media-ctl -d /dev/media0 -V "\"axi:isp_subset_convertor\":0 [fmt:VUY8_1X24/1920x1080 field:none]"
+media-ctl -d /dev/media0 -V "\"axi:isp_subset_convertor\":1 [fmt:Y8_1X8/1920x1080 field:none]"
+media-ctl -d /dev/media0 -V "\"b0000000.v_proc_ss\":0 [fmt:RBG888_1X24/1920x1080 field:none]"
+media-ctl -d /dev/media0 -V "\"b0000000.v_proc_ss\":1 [fmt:VUY8_1X24/1920x1080 field:none]"
 media-ctl -d /dev/media0 -V "\"b0040000.v_demosaic\":1 [fmt:RBG888_1X24/1920x1080 field:none]"
-media-ctl -d /dev/media0 -V "\"b0000000.v_proc_ss\":1 [fmt:RBG888_1X24/1920x1080 field:none]"
+
 
 # Wait for previous command to complete
 echo $?
@@ -16,6 +20,7 @@ media-ctl -d /dev/media0 -p
 # Tune the sensor parameters for better image quality
 echo "Run v4l2 commands to tune the sensor parameters for better image quality"
 echo "\n"
+v4l2-ctl -d /dev/v4l-subdev0 -l 
 v4l2-ctl -d /dev/v4l-subdev0 -c exposure=10000
 v4l2-ctl -d /dev/v4l-subdev0 -c black_level=150
 v4l2-ctl -d /dev/v4l-subdev0 -c gain=250

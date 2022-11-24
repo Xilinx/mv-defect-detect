@@ -1,0 +1,174 @@
+
+# Development Guide
+
+1. Refer to the [K260 SOM Starter Kit Tutorial](https://xilinx.github.io/kria-apps-docs/main/build/html/docs/build_petalinux.html#build-the-sdk) for building the application.
+
+# Setting up the Board
+
+1. Get the SD Card Image from [Boot Image Site](http://xilinx.com/) and follow the instructions in UG1089 to burn the SD card. And install the SD card to J11.
+
+2. Hardware Setup:
+
+    * Monitor:
+
+      This application requires **1080p** monitor, so that 1920x1080 video could be displayed.
+
+      Before booting the board, please connect the monitor to the board via DP.
+
+    * UART/JTAG interface:
+
+      For interacting and seeing boot-time information, connect a USB debugger to the J4.
+
+    * Network connection:
+
+      Connect the Ethernet cable to your local network with DHCP enabled to install packages.
+
+3. Power on the board, login with username `ubuntu`, and you need to setup the password for the first time bootup.
+
+4. Dynamically load the application package.
+
+    The firmware consist of bitstream, device tree overlay (dtbo) and xclbin file. The firmware is loaded dynamically on user request once Linux is fully booted. The xmutil utility can be used for that purpose.
+
+    1. Shows the list and status of available acceleration platforms and Applications:
+
+        `sudo xmutil      listapps`
+
+    2.  Switch to a different platform for different Application:
+
+        *  When xmutil listapps reveals that no accelerator is currently active, select the desired application:
+
+            `sudo xmutil      loadapp kr260-mv-camera`
+
+        *  When xmutil listapps reveals that an accellerator is already active, unload it first, then select the desired application:
+
+            `sudo xmutil      unloadapp <NAME_OF_ACTIVE_APP>`
+
+            `sudo xmutil      loadapp kr260-mv-camera`
+
+5. Get started with the latest docker with mv-defect-detect application.
+
+     1. Pull docker from xilinx/mv-defect-detect:2022.1
+
+           `sudo docker pull xilinx/mv-defect-detect:2022.1`
+     
+     2. Disable ubuntu desktop before running docker
+
+           `xmutil desktop_disable`
+
+     3. Run the docker
+
+            `docker run \
+	    --env="DISPLAY" \
+	    --env="XDG_SESSION_TYPE" \
+	    --net=host \
+	    --privileged \
+	    --volume /tmp:/tmp \
+	    --volume="$HOME/.Xauthority:/root/.Xauthority:rw" \
+	    -v /dev:/dev \
+	    -v /sys:/sys \
+	    -v /etc/vart.conf:/etc/vart.conf \
+	    -v /lib/firmware/xilinx:/lib/firmware/xilinx \
+	    -v /run:/run \
+	    -v /mnt/media:/mnt/media \
+	    -it xilinx/mv-defect-detect bash`
+
+          Note: For setups without access to the internet, it is possible to download and use the docker locally. Please refer to the `K260 SOM Starter Kit Tutorial` for instructions.
+
+
+# How to run the application:
+
+## Interacting with the application
+    The application is targeted to run only live and file based inputs.
+
+    We assume input to support resolution=1920x1080(width=1920 and height=1080) and format=GRAY8(Y8)
+
+To interact with application, via Command line
+
+### Command Line
+
+#### Examples:
+
+    **Note** Only one instance of the application can run at a time.
+
+    /* for File-In and File-Out playback, run below command.
+    mv-defect-detect -i input.y8 -o 0 -f out_raw.y8
+    **Note** Raw output will be dumped into file.
+    mv-defect-detect -i input.y8 -o 1 -f out_preproc.y8
+    **Note** Preprocess output will be dumped into file.
+    mv-defect-detect -i input.y8 -o 2 -f out_final.y8
+    **Note** Final output will be dumped into file.
+
+    /* for File-In and Display-Out playback, run below command.
+    mv-defect-detect -i input.y8
+    **Note** Raw output will be displayed on DP. Input file path needs to be changed as per the requirement.
+    mv-defect-detect -i input.y8 -o 0
+    **Note** This command is same as above command. Raw output will be displayed on DP. Input file path needs to be changed as per the requirement.
+    mv-defect-detect -i input.y8 -o 1
+    **Note** Preprocess output will be displayed on DP. Input file path needs to be changed as per the requirement.
+    mv-defect-detect -i input.y8 -o 2
+    **Note** Final output will be displayed on DP. Input file path needs to be changed as per the requirement.
+
+    /* for Live-In and File-Out playback, run below command.
+    mv-defect-detect -o 0 -f out_raw.y8
+    **Note** Raw output will be dumped into file.
+    mv-defect-detect -o 1 -f out_preproc.y8
+    **Note** Preprocess output will be dumped into file.
+    mv-defect-detect -o 2 -f out_final.y8
+    **Note** Final output will be dumped into file.
+
+    /* for Live-In and Display-Out playback, run below command.
+    mv-defect-detect -o 0
+    **Note**  Raw output will be displayed on DP.
+    mv-defect-detect -o 1
+    **Note**  Preprocess output will be displayed on DP.
+    mv-defect-detect -o 2
+    **Note**  Final output will be displayed on DP.
+
+#### Command Options:
+
+The examples show the capability of the mv-defect-detect for specific configurations. User can get more and detailed application options as following by invoking
+demomode is supported for DP out only. demomode is not supported for file sink.
+
+`   mv-defect-detect --help`
+
+```
+Usage:
+  mv-defect-detect [OPTION?] - Application to detect the defect of Mango on Xilinx board
+
+Help Options:
+  -?, --help                                                    Show help options
+  --help-all                                                    Show all help options
+  --help-gst                                                    Show GStreamer Options
+
+Application Options:
+  -i, --infile=file path                                        Location of input file
+  -f, --outfile=file path                                       Location of output file
+  -w, --width=1920                                              Resolution width of the input
+  -h, --height=1080                                             Resolution height of the input
+  -o, --output=0                                                Display/Dump stage on DP/File
+  -r, --framerate=60                                            Framerate of input source
+  -d, --demomode=0                                              For Demo mode value must be 1
+  -c, --cfgpath=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/     JSON config file path
+```
+
+# Files structure
+
+* The application is installed as:
+
+    * Binary File Directory: /opt/xilinx/xlnx-app-kr260-mv-defect-detect/bin
+
+        | Filename        | Description |
+        |-----------------|-------------|
+        | mv-defect-detect| main app    |
+
+    * Configuration file directory: /opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/
+
+        | Filename                           | Description                                           |
+        |------------------------------------|-------------------------------------------------------|
+        | cca-accelarator.json               | Config of CCA accelarator.                            |
+        | otsu-accelarator.json              | Config of OTSU accelarator.                           |
+        | preprocess-accelarator.json        | Config of pre-process accelarator.                    |
+        | preprocess-accelarator-stride.json | Config of pre-process accelarator with stride.        |
+        | text2overlay.json                  | Config of text2overlay.                               |
+
+<p align="center"><sup>Copyright&copy; 2022, Advanced Micro Devices, Inc.</sup></p>
