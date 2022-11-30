@@ -1,0 +1,19 @@
+{
+  "xclbin-location": "/lib/firmware/xilinx/kr260-mv-camera/kr260-mv-camera.xclbin",
+  "vvas-library-repo": "/opt/xilinx/xlnx-app-kr260-mv-defect-detect/lib",
+  "element-mode":"inplace",
+  "kernels" :[
+    {
+      "library-name":"libvvas_text2overlay.so",
+      "config": {
+        "debug_level" : 1,
+        "font_size" : 1.0,
+        "font" : 3,
+        "x_offset" : 0,
+        "y_offset" : 100,
+        "defect_threshold" : 0.14,
+        "is_acc_result" : 0
+      }
+    }
+  ]
+}
