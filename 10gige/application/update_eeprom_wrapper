@@ -1,5 +1,47 @@
 #!/bin/sh
 
+# check firmware is loaded
+if [ -z "`xmutil listapps | grep kr260-mv-camera`" ]; then
+        echo "
+*******************************************************************************
+     App not loaded. Please load using \"xmutil loadapp kr260-mv-camera\"
+*******************************************************************************
+"
+        exit;
+fi
+
+if [ `xmutil listapps | grep kr260-mv-camera |  awk -F' ' '{ print $6 }'` = "-1" ];
+then
+        echo "
+*******************************************************************************
+     App not loaded. Please load using \"xmutil loadapp kr260-mv-camera\"
+*******************************************************************************
+"
+        exit;
+fi
+
+# check SFP_LOS signal
+GPIO="/sys/class/gpio"
+G420="${GPIO}/gpio420"
+EXPOR="${GPIO}/export"
+
+if [ ! -d "$G420" ]; then
+        echo 420 > ${EXPOR}
+fi
+val=`cat ${G420}/value`
+if [ "$val" = "1" ]; then
+        # 10G interface not connected
+        echo "
+********************************************************************************
+     KR260 board is not connected to host machine using SFP+ connector.
+      Please connect 10GigE interface in KR260 board to host machine
+                to avoid synchronous external abort.
+********************************************************************************
+        "
+        exit
+fi
+
+# update eeprom wrapper
 APPDIR=/opt/xilinx/xlnx-app-kr260-mv-defect-detect
 
 tmpdir="$(mktemp -d)"
