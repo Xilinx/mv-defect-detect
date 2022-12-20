@@ -1,16 +1,7 @@
 #!/bin/sh
 
 # check firmware is loaded
-if [ -z "`xmutil listapps | grep kr260-mv-camera`" ]; then
-        echo "
-*******************************************************************************
-     App not loaded. Please load using \"xmutil loadapp kr260-mv-camera\"
-*******************************************************************************
-"
-        exit;
-fi
-
-if [ `xmutil listapps | grep kr260-mv-camera |  awk -F' ' '{ print $6 }'` = "-1" ];
+if [ `media-ctl -d /dev/media*  -p | grep driver | grep xilinx-video | wc -l` = "0" ];
 then
         echo "
 *******************************************************************************
