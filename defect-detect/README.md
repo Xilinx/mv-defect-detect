@@ -70,6 +70,7 @@
 	    -v /lib/firmware/xilinx:/lib/firmware/xilinx \
 	    -v /run:/run \
 	    -v /mnt/media:/mnt/media \
+            -h "xlnx-docker" \
 	    -it xilinx/mv-defect-detect bash`
 
           Note: For setups without access to the internet, it is possible to download and use the docker locally. Please refer to the `K260 SOM Starter Kit Tutorial` for instructions.
