@@ -22,7 +22,7 @@ echo "Run v4l2 commands to tune the sensor parameters for better image quality"
 echo "\n"
 v4l2-ctl -d /dev/v4l-subdev0 -l 
 v4l2-ctl -d /dev/v4l-subdev0 -c exposure=10000
-v4l2-ctl -d /dev/v4l-subdev0 -c black_level=150
+v4l2-ctl -d /dev/v4l-subdev0 -c black_level=100
 v4l2-ctl -d /dev/v4l-subdev0 -c gain=250
 
 # Wait for previous command to complete
