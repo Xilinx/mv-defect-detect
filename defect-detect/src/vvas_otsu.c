@@ -18,11 +18,27 @@
 #include <vvas/vvas_kernel.h>
 #include <gst/vvas/gstinferencemeta.h>
 
+struct bgr2y8_params {
+    int32_t black_Vmax;
+    int32_t black_Smax;
+    int32_t brown_Hmax;
+    int32_t brown_Vmax;
+    int32_t Smin;
+    int32_t Smax;
+    int32_t darkgreen_Vmax;
+    int32_t darkgreen_Hmin;
+    int32_t darkgreen_Hmax;
+    int32_t green_Hmax;
+    int32_t green_Hmin;
+    int32_t green_Vmax;
+};
+
 typedef struct _kern_priv
 {
     int log_level;
-    VVASFrame *mem;
-} PreProcessingKernelPriv;
+    VVASFrame *otsuval;
+    VVASFrame *array_params;
+} OtsuKernelPriv;
 
 int32_t  xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NUM_OBJECT], VVASFrame *output[MAX_NUM_OBJECT]);
 int32_t  xlnx_kernel_done(VVASKernel *handle);
@@ -31,10 +47,12 @@ uint32_t xlnx_kernel_deinit(VVASKernel *handle);
 
 uint32_t xlnx_kernel_deinit(VVASKernel *handle)
 {
-    PreProcessingKernelPriv *kernel_priv;
-    kernel_priv = (PreProcessingKernelPriv *)handle->kernel_priv;
-    if (kernel_priv->mem)
-        vvas_free_buffer (handle, kernel_priv->mem);
+    OtsuKernelPriv *kernel_priv;
+    kernel_priv = (OtsuKernelPriv *)handle->kernel_priv;
+    if (kernel_priv->otsuval)
+        vvas_free_buffer (handle, kernel_priv->otsuval);
+    if (kernel_priv->array_params)
+        vvas_free_buffer (handle, kernel_priv->array_params);
     free(kernel_priv);
     return 0;
 }
@@ -43,14 +61,29 @@ int32_t xlnx_kernel_init(VVASKernel *handle)
 {
     json_t *jconfig = handle->kernel_config;
     json_t *val; /* kernel config from app */
-    PreProcessingKernelPriv *kernel_priv;
+    OtsuKernelPriv *kernel_priv;
+    struct bgr2y8_params def_params = {
+        .black_Vmax = 20,
+        .black_Smax = 70,
+        .brown_Hmax = 15,
+        .brown_Vmax = 40,
+        .Smin = 60,
+        .Smax = 90,
+        .darkgreen_Vmax = 35,
+        .darkgreen_Hmin = 30,
+        .darkgreen_Hmax = 45,
+        .green_Hmax = 90,
+        .green_Hmin = 50,
+        .green_Vmax = 45
+    };
 
-    kernel_priv = (PreProcessingKernelPriv *)calloc(1, sizeof(PreProcessingKernelPriv));
+    kernel_priv = (OtsuKernelPriv *)calloc(1, sizeof(OtsuKernelPriv));
     if (!kernel_priv) {
         printf("Error: Unable to allocate PPE kernel memory\n");
     }
-    kernel_priv->mem = vvas_alloc_buffer (handle, 1*(sizeof(uint32_t)), VVAS_INTERNAL_MEMORY, DEFAULT_MEM_BANK, NULL);
-
+    kernel_priv->otsuval = vvas_alloc_buffer (handle, 1*(sizeof(uint32_t)), VVAS_INTERNAL_MEMORY, DEFAULT_MEM_BANK, NULL);
+    kernel_priv->array_params = vvas_alloc_buffer (handle, sizeof(def_params), VVAS_INTERNAL_MEMORY, DEFAULT_MEM_BANK, NULL);
+    memcpy(kernel_priv->array_params->vaddr[0], &def_params, sizeof(def_params));
 
     /* parse config */
     val = json_object_get (jconfig, "debug_level");
@@ -67,19 +100,20 @@ int32_t xlnx_kernel_init(VVASKernel *handle)
 
 int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NUM_OBJECT], VVASFrame *output[MAX_NUM_OBJECT])
 {
-    PreProcessingKernelPriv *kernel_priv;
+    OtsuKernelPriv *kernel_priv;
     int ret;
     uint32_t *thr;
     float sigma = 0.0;
     GstInferenceMeta *infer_meta = NULL;
     VVASFrame *outframe = output[0];
-    kernel_priv = (PreProcessingKernelPriv *)handle->kernel_priv;
-    ret = vvas_kernel_start (handle, "ppuufp", input[0]->paddr[0], \
-                             output[0]->paddr[0], input[0]->props.height, input[0]->props.width, sigma, kernel_priv->mem->paddr[0]);
+    kernel_priv = (OtsuKernelPriv *)handle->kernel_priv;
+    ret = vvas_kernel_start (handle, "ppuufpp", input[0]->paddr[0], \
+                             output[0]->paddr[0], input[0]->props.height, input[0]->props.width, sigma, \
+                             kernel_priv->otsuval->paddr[0], kernel_priv->array_params->paddr[0]);
 #if 0
     ret = vvas_kernel_start (handle, "ppuufpu", input[0]->paddr[0], \
                              output[0]->paddr[0], input[0]->props.height, input[0]->props.width, \
-                             sigma, kernel_priv->mem->paddr[0], input[0]->props.stride);
+                             sigma, kernel_priv->otsuval->paddr[0], input[0]->props.stride);
 #endif
 
     if (ret < 0) {
@@ -93,7 +127,7 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
         LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "Failed to receive response from kernel");
         return FALSE;
     }
-    thr =  kernel_priv->mem->vaddr[0]; 
+    thr =  kernel_priv->otsuval->vaddr[0];
     infer_meta = (GstInferenceMeta *) gst_buffer_add_meta ((GstBuffer *)outframe->app_priv,
                                                      gst_inference_meta_get_info (), NULL);
     if (infer_meta == NULL) {
