@@ -35,7 +35,6 @@ GST_DEBUG_CATEGORY (defectdetect_app);
 #define CCA_ACC_JSON_FILE            "cca-accelarator.json"
 #define TEXT_2_OVERLAY_JSON_FILE     "text2overlay.json"
 #define DRM_BUS_ID                   "fd4a0000.display"
-#define CAPTURE_FORMAT_Y8            "GRAY8"
 #define MAX_WIDTH                    1920
 #define MAX_HEIGHT                   1080
 #define MAX_FRAME_RATE_DENOM         1
@@ -68,7 +67,9 @@ gboolean file_playback = FALSE;
 gboolean file_dump = FALSE;
 gboolean demo_mode = FALSE;
 static gchar* in_file = NULL;
-static gchar* config_path  = (gchar *)"/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/mono/";
+static gchar* mono_config_path  = (gchar *)"/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/mono/";
+static gchar* color_config_path  = (gchar *)"/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/color/";
+static gchar* config_path = NULL;
 static gchar *msg_firmware = (gchar *)"Load the HW accelerator firmware first. Use command: xmutil loadapp kr260-mv-camera-mono OR xmutil loadapp kr260-mv-camera-color\n";
 static gchar* out_file = NULL;
 guint width =  1920;
@@ -76,7 +77,11 @@ guint height = 1080;
 guint stride_align = 256;
 guint dp = 0;
 guint framerate = 60;
+gint block_size;
 static string dev_node("");
+static gchar* format = (gchar *)"mono";
+static gchar* caps_fmt = (gchar *)"GRAY8";
+static GstVideoFormat parse_fmt = GST_VIDEO_FORMAT_GRAY8;
 
 static GOptionEntry entries[] =
 {
@@ -86,6 +91,7 @@ static GOptionEntry entries[] =
     { "height",       'h', 0, G_OPTION_ARG_INT, &height, "Resolution height of the input", "1080"},
     { "output",       'o', 0, G_OPTION_ARG_INT, &dp, "Display/dump stage on DP/File", "0"},
     { "framerate",    'r', 0, G_OPTION_ARG_INT, &framerate, "Framerate of input source", "60"},
+    { "sensor-fmt",   's', 0, G_OPTION_ARG_STRING, &format, "Sensor format: must be mono or color", "mono"},
     { "demomode",     'd', 0, G_OPTION_ARG_INT, &demo_mode, "For Demo mode value must be 1", "0"},
     { "cfgpath",      'c', 0, G_OPTION_ARG_STRING, &config_path, "JSON config file path", "/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/mono"},
     { NULL }
@@ -239,12 +245,11 @@ on_deep_element_added (GstBin *bin,
  */
 DD_ERROR_LOG
 set_pipeline_config (AppData *data) {
-    gint block_size;
+
     GstCaps *caps;
     string config_file(config_path);
     gint ret = DD_SUCCESS;
     if (file_playback) {
-        block_size = width * height;
         g_object_set(G_OBJECT(data->src),            "location",  in_file,         NULL);
         g_object_set(G_OBJECT(data->src),            "blocksize", block_size,      NULL);
     } else {
@@ -269,7 +274,7 @@ set_pipeline_config (AppData *data) {
                 g_object_set (G_OBJECT (data->rawvparse),  "use-sink-caps", FALSE,                    NULL);
                 g_object_set (G_OBJECT (data->rawvparse),  "width",         width,                    NULL);
                 g_object_set (G_OBJECT (data->rawvparse),  "height",        height,                   NULL);
-                g_object_set (G_OBJECT (data->rawvparse),  "format",        GST_VIDEO_FORMAT_GRAY8,     NULL);
+                g_object_set (G_OBJECT (data->rawvparse),  "format",        parse_fmt,                NULL);
                 g_object_set (G_OBJECT (data->rawvparse),  "framerate",     MAX_DEMO_MODE_FRAME_RATE, MAX_FRAME_RATE_DENOM, NULL);
             }
         }
@@ -277,7 +282,7 @@ set_pipeline_config (AppData *data) {
     caps  = gst_caps_new_simple ("video/x-raw",
                                  "width",     G_TYPE_INT,        width,
                                  "height",    G_TYPE_INT,        height,
-                                 "format",    G_TYPE_STRING,     CAPTURE_FORMAT_Y8,
+                                 "format",    G_TYPE_STRING,     caps_fmt,
                                  "framerate", GST_TYPE_FRACTION, framerate, MAX_FRAME_RATE_DENOM,
                                  NULL);
     GST_DEBUG ("new Caps for src capsfilter %" GST_PTR_FORMAT, caps);
@@ -289,9 +294,9 @@ set_pipeline_config (AppData *data) {
                                  "width",     G_TYPE_INT,        width,
                                  "height",    G_TYPE_INT,        height,
                                  "stride-align",    G_TYPE_INT,  stride_align,
-                                 "format",    G_TYPE_STRING,     CAPTURE_FORMAT_Y8,
+                                 "format",    G_TYPE_STRING,     (dp == 0 ? caps_fmt : "GRAY8"),
                                  NULL);
-    GST_DEBUG ("new Caps for src capsfilter_op %" GST_PTR_FORMAT, caps);
+    GST_DEBUG ("new Caps for output capsfilter_op %" GST_PTR_FORMAT, caps);
 
     g_object_set (G_OBJECT (data->capsfilter_op),  "caps",  caps, NULL);
     gst_caps_unref (caps);
@@ -566,10 +571,28 @@ main (int argc, char **argv) {
     GST_DEBUG ("Width : %d", width);
     GST_DEBUG ("Height : %d", height);
     GST_DEBUG ("Framerate : %d", framerate);
+    GST_DEBUG ("Sensor format : %s", format);
     GST_DEBUG ("Display stage : %d", dp);
     GST_DEBUG ("File playback mode : %s", file_playback ? "TRUE" : "FALSE");
     GST_DEBUG ("File dump : %s", file_dump ? "TRUE" : "FALSE");
     GST_DEBUG ("Demo mode : %s", demo_mode ? "On" : "Off");
+
+    if (g_strcmp0 (format, "mono") == 0) {
+        parse_fmt = GST_VIDEO_FORMAT_GRAY8;
+        caps_fmt = (gchar *) "GRAY8";
+        block_size = width * height;
+        if (! config_path)
+	    config_path = mono_config_path;
+    } else if (g_strcmp0 (format, "color") == 0) {
+        parse_fmt = GST_VIDEO_FORMAT_RGB;
+        caps_fmt = (gchar *) "RGB";
+        block_size = width * height * 3; // RGB has 3 channels
+        if (! config_path)
+	    config_path = color_config_path;
+    } else {
+        g_printerr ("Sensor format '%s' not supported\n", format);
+        return -1;
+    }
 
     if (config_path)
         GST_DEBUG ("config path is %s", config_path);
@@ -582,6 +605,7 @@ main (int argc, char **argv) {
         g_printerr ("Exiting the app with an error: %s\n", error_to_string (ret));
         return ret;
     }
+
     if (demo_mode && file_dump){
         ret = DD_ERROR_FILE_DUMP_IN_DEMO_NOT_SUPPORTED;
         g_printerr ("Exiting the app with an error: %s\n", error_to_string (ret));
@@ -601,8 +625,8 @@ main (int argc, char **argv) {
     }
     if (!file_playback ) {
         std::string script_caller;
-        GST_DEBUG ("Calling default sensor calibration script");
-        script_caller = "echo | configure " + dev_node;
+        GST_DEBUG ("Calling sensor calibration script for %s sensor", format);
+        script_caller = "echo | configure -f " + std::string(format);
         exec(script_caller.c_str());
     }
     ret = create_pipeline (&data);
