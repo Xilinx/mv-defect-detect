@@ -68,12 +68,20 @@ install(FILES
     )
 
 install(FILES
-    config/otsu-accelarator.json
-    config/text2overlay.json
-    config/cca-accelarator.json
-    config/preprocess-accelarator.json
-    config/preprocess-accelarator-stride.json
-    DESTINATION ${INSTALL_PATH}/share/vvas/)
+    config/mono/otsu-accelarator.json
+    config/mono/text2overlay.json
+    config/mono/cca-accelarator.json
+    config/mono/preprocess-accelarator.json
+    config/mono/preprocess-accelarator-stride.json
+    DESTINATION ${INSTALL_PATH}/share/vvas/mono)
+
+install(FILES
+    config/color/otsu-accelarator.json
+    config/color/text2overlay.json
+    config/color/cca-accelarator.json
+    config/color/preprocess-accelarator.json
+    config/color/preprocess-accelarator-stride.json
+    DESTINATION ${INSTALL_PATH}/share/vvas/color)
 
 set(VERSION "1.0.0")
 set(CPACK_PACKAGE_VERSION ${VERSION})

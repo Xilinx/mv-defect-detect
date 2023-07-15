@@ -68,8 +68,8 @@ gboolean file_playback = FALSE;
 gboolean file_dump = FALSE;
 gboolean demo_mode = FALSE;
 static gchar* in_file = NULL;
-static gchar* config_path  = (gchar *)"/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/";
-static gchar *msg_firmware = (gchar *)"Load the HW accelerator firmware first. Use command: xmutil loadapp kr260-mv-camera\n";
+static gchar* config_path  = (gchar *)"/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/mono/";
+static gchar *msg_firmware = (gchar *)"Load the HW accelerator firmware first. Use command: xmutil loadapp kr260-mv-camera-mono OR xmutil loadapp kr260-mv-camera-color\n";
 static gchar* out_file = NULL;
 guint width =  1920;
 guint height = 1080;
@@ -87,7 +87,7 @@ static GOptionEntry entries[] =
     { "output",       'o', 0, G_OPTION_ARG_INT, &dp, "Display/dump stage on DP/File", "0"},
     { "framerate",    'r', 0, G_OPTION_ARG_INT, &framerate, "Framerate of input source", "60"},
     { "demomode",     'd', 0, G_OPTION_ARG_INT, &demo_mode, "For Demo mode value must be 1", "0"},
-    { "cfgpath",      'c', 0, G_OPTION_ARG_STRING, &config_path, "JSON config file path", "/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/"},
+    { "cfgpath",      'c', 0, G_OPTION_ARG_STRING, &config_path, "JSON config file path", "/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/mono"},
     { NULL }
 };
 
