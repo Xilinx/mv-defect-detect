@@ -465,7 +465,7 @@ create_pipeline (AppData *data) {
     data->text2overlay    =  gst_element_factory_make("vvas_xfilter",  "text2overlay");
     data->queue           =  gst_element_factory_make("queue",         NULL);
     data->q_raw           =  gst_element_factory_make("queue",         NULL);
-    data->q_raw_1           =  gst_element_factory_make("queue",         NULL);
+    data->q_raw_1         =  gst_element_factory_make("queue",         NULL);
     data->perf            =  gst_element_factory_make("perf",          "perf-raw");
     data->videorate       =  gst_element_factory_make("videorate",     NULL);
 
@@ -589,7 +589,7 @@ main (int argc, char **argv) {
     }
 
     if (access("/dev/dri/by-path/platform-fd4a0000.display-card", F_OK) != 0) {
-        g_printerr("ERROR: Mixer device is not ready.\n%s", msg_firmware);
+        g_printerr("ERROR: Display device is not ready.\n%s", msg_firmware);
         return -1;
     } else {
         exec("echo | modetest -M xlnx -D fd4a0000.display -s 43@41:1920x1080-60@BG24 -w 40:\"alpha\":255");
