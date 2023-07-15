@@ -1,13 +1,74 @@
-#!/bin/sh
+#!/bin/bash
 
-# Configure the media nodes
-media-ctl -d /dev/media0 -V "\"imx547 7-001a\":0 [fmt:SRGGB10_1X10/1920x1080 field:none @1/60]"
-media-ctl -d /dev/media0 -V "\"axi:isp_subset_convertor\":0 [fmt:VUY8_1X24/1920x1080 field:none]"
-media-ctl -d /dev/media0 -V "\"axi:isp_subset_convertor\":1 [fmt:Y8_1X8/1920x1080 field:none]"
-media-ctl -d /dev/media0 -V "\"b0000000.v_proc_ss\":0 [fmt:RBG888_1X24/1920x1080 field:none]"
-media-ctl -d /dev/media0 -V "\"b0000000.v_proc_ss\":1 [fmt:VUY8_1X24/1920x1080 field:none]"
-media-ctl -d /dev/media0 -V "\"b0040000.v_demosaic\":1 [fmt:RBG888_1X24/1920x1080 field:none]"
+function print_help() {
+  echo -e "Usage:"
+  echo -e "  $0 [options]"
+  echo -e ""
+  echo -e "Options:"
+  echo -e "  -h, --help         : Display this help and exit"
+  echo -e "  -m, --media-device : Media device node (default: /dev/media0)"
+  echo -e "  -f, --format <fmt> : Valid values for <fmt>: color or mono"
+}
 
+# Set default mode to mono
+fmt="mono"
+media="/dev/media0"
+
+while [ "$1" != "" ]; do
+  case $1 in
+  -h | --help )
+    print_help $0
+    exit 0
+    ;;
+  -m | --media-device )
+    shift
+    media=$1
+    ;;
+  -f | --format )
+    shift
+    fmt=$1
+    ;;
+  * )
+    echo -e "invalid argument '$1'\n"
+    print_help $0
+    exit 1
+    ;;
+  esac
+  shift
+done
+
+# check media node exists
+if [ ! -e ${media} ]; then
+  echo "Requested media node ${media} does not exist."
+  exit 1
+fi
+
+# check mode is valid
+if [ "${fmt}" = "mono" ]; then
+  echo "Configure pipeline for imx547 monochrome sensor"
+  fmt1="Y10_1X10"
+  fmt2="Y8_1X8"
+  fmt3="Y8_1X8"
+elif [ "${fmt}" = "color" ]; then
+  echo "Configure pipeline for imx547 color sensor"
+  fmt1="SRGGB10_1X10"
+  fmt2="SRGGB8_1X8"
+  fmt3="RBG888_1X24"
+else
+  echo "Invalid format ${fmt}. Supported formats are: color or mono"
+  exit 1
+fi
+
+# Configure the sensor subdev node
+# Even though we are requesting 1920x1080, the sensor driver hard-codes the
+# resolution to 2472x2128. There is a crop and a fixed resize IP in the capture
+# pipeline that crops 64 pixel lines of optical black and down-sizes the image
+# to 1920x1080.
+media-ctl -d ${media} -V "\"imx547 7-001a\":0 [fmt:${fmt1}/2472x2064 field:none @1/60]"
+media-ctl -d ${media} -V "\"axi:isp_subset_convertor_0\":0 [${fmt1}/2472x2064 field:none]"
+media-ctl -d ${media} -V "\"axi:isp_subset_convertor_0\":1 [${fmt2}/2472x2064 field:none]"
+media-ctl -d ${media} -V "\"b0000000.ISPPipeline_accel\":0 [${fmt2}/2472x2064 field:none]"
+media-ctl -d ${media} -V "\"b0000000.ISPPipeline_accel\":1 [${fmt3}/1920x1080 field:none]"
 
 # Wait for previous command to complete
 echo $?
@@ -15,15 +76,21 @@ echo $?
 # Print the media graph to check device topology & its formats
 echo "Check the media graph for 1920x1080p & formats"
 echo "\n"
-media-ctl -d /dev/media0 -p
+media-ctl -d ${media} -p
 
 # Tune the sensor parameters for better image quality
 echo "Run v4l2 commands to tune the sensor parameters for better image quality"
 echo "\n"
-v4l2-ctl -d /dev/v4l-subdev0 -l 
-v4l2-ctl -d /dev/v4l-subdev0 -c exposure=10000
-v4l2-ctl -d /dev/v4l-subdev0 -c black_level=100
-v4l2-ctl -d /dev/v4l-subdev0 -c gain=250
+if [ "${fmt}" = "mono" ]; then
+  v4l2-ctl -d /dev/video0 -c black_level=50
+  v4l2-ctl -d /dev/video0 -c exposure=400
+  v4l2-ctl -d /dev/video0 -c gain=250
+elif [ "${fmt}" = "color" ]; then
+  v4l2-ctl -d /dev/video0 -c black_level=50
+  v4l2-ctl -d /dev/video0 -c exposure=5000
+  v4l2-ctl -d /dev/video0 -c gain=300
+fi
+v4l2-ctl -d /dev/video0 -l
 
 # Wait for previous command to complete
 echo $?
