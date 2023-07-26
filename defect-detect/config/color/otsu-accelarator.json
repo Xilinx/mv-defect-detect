@@ -1,5 +1,5 @@
 {
-  "xclbin-location": "/lib/firmware/xilinx/kr260-mv-camera/kr260-mv-camera.xclbin",
+  "xclbin-location": "/lib/firmware/xilinx/kr260-mv-camera-color/kr260-mv-camera-color.xclbin",
   "vvas-library-repo": "/opt/xilinx/xlnx-app-kr260-mv-defect-detect/lib",
   "element-mode": "transform",
   "kernels": [

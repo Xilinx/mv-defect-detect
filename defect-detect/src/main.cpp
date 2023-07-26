@@ -35,7 +35,6 @@ GST_DEBUG_CATEGORY (defectdetect_app);
 #define CCA_ACC_JSON_FILE            "cca-accelarator.json"
 #define TEXT_2_OVERLAY_JSON_FILE     "text2overlay.json"
 #define DRM_BUS_ID                   "fd4a0000.display"
-#define CAPTURE_FORMAT_Y8            "GRAY8"
 #define MAX_WIDTH                    1920
 #define MAX_HEIGHT                   1080
 #define MAX_FRAME_RATE_DENOM         1
@@ -68,15 +67,21 @@ gboolean file_playback = FALSE;
 gboolean file_dump = FALSE;
 gboolean demo_mode = FALSE;
 static gchar* in_file = NULL;
-static gchar* config_path  = (gchar *)"/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/";
-static gchar *msg_firmware = (gchar *)"Load the HW accelerator firmware first. Use command: xmutil loadapp kr260-mv-camera\n";
+static gchar* mono_config_path  = (gchar *)"/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/mono/";
+static gchar* color_config_path  = (gchar *)"/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/color/";
+static gchar* config_path = NULL;
+static gchar *msg_firmware = (gchar *)"Load the HW accelerator firmware first. Use command: xmutil loadapp kr260-mv-camera-mono OR xmutil loadapp kr260-mv-camera-color\n";
 static gchar* out_file = NULL;
 guint width =  1920;
 guint height = 1080;
 guint stride_align = 256;
 guint dp = 0;
 guint framerate = 60;
+gint block_size;
 static string dev_node("");
+static gchar* format = (gchar *)"mono";
+static gchar* caps_fmt = (gchar *)"GRAY8";
+static GstVideoFormat parse_fmt = GST_VIDEO_FORMAT_GRAY8;
 
 static GOptionEntry entries[] =
 {
@@ -86,8 +91,9 @@ static GOptionEntry entries[] =
     { "height",       'h', 0, G_OPTION_ARG_INT, &height, "Resolution height of the input", "1080"},
     { "output",       'o', 0, G_OPTION_ARG_INT, &dp, "Display/dump stage on DP/File", "0"},
     { "framerate",    'r', 0, G_OPTION_ARG_INT, &framerate, "Framerate of input source", "60"},
+    { "sensor-fmt",   's', 0, G_OPTION_ARG_STRING, &format, "Sensor format: must be mono or color", "mono"},
     { "demomode",     'd', 0, G_OPTION_ARG_INT, &demo_mode, "For Demo mode value must be 1", "0"},
-    { "cfgpath",      'c', 0, G_OPTION_ARG_STRING, &config_path, "JSON config file path", "/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/"},
+    { "cfgpath",      'c', 0, G_OPTION_ARG_STRING, &config_path, "JSON config file path", "/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/mono"},
     { NULL }
 };
 
@@ -212,21 +218,7 @@ error_to_string (gint error_code) {
     }
     return "Unknown Error";
 }
-void
-on_deep_element_added (GstBin *bin,
-                       GstBin *sub_bin,
-                       GstElement *element,
-                       gpointer user_data) {
-    guint *enable_roi = (guint *) user_data;
-    GstElementFactory *factory = gst_element_get_factory (element);
-    const gchar *klass = gst_element_factory_get_klass(factory);
-    if (!g_strcmp0 (klass, "Source/Video") && dp ==0 && !file_dump) {
-        if (g_object_class_find_property(G_OBJECT_GET_CLASS(element), "io-mode")) {
-            GST_DEBUG ("Setting io-mode to dmabuf-import");
-            g_object_set (G_OBJECT(element), "io-mode", 5, NULL);
-        }
-    }
-}
+
 /** @brief
  *  This function is to set the GstElement properties.
  *
@@ -239,17 +231,19 @@ on_deep_element_added (GstBin *bin,
  */
 DD_ERROR_LOG
 set_pipeline_config (AppData *data) {
-    gint block_size;
+
     GstCaps *caps;
     string config_file(config_path);
     gint ret = DD_SUCCESS;
     if (file_playback) {
-        block_size = width * height;
         g_object_set(G_OBJECT(data->src),            "location",  in_file,         NULL);
         g_object_set(G_OBJECT(data->src),            "blocksize", block_size,      NULL);
     } else {
-        g_object_set(G_OBJECT(data->src),            "media-device", "/dev/media0", NULL);
-        g_signal_connect (GST_BIN (data->src),       "deep-element-added", G_CALLBACK (on_deep_element_added), NULL);
+        g_object_set(G_OBJECT(data->src),            "device", "/dev/video0", NULL);
+        if (dp == 0 && !file_dump) {
+            GST_DEBUG ("Setting io-mode to dmabuf-import");
+            g_object_set (G_OBJECT(data->src),       "io-mode", 5, NULL);
+        }
     }
     if (file_dump) {
         g_object_set(G_OBJECT(data->sink),       "location",  out_file,        NULL);
@@ -257,6 +251,8 @@ set_pipeline_config (AppData *data) {
         //g_object_set(G_OBJECT(data->sink_display),   "location",  final_out,      NULL);
     } else {
         g_object_set(G_OBJECT(data->sink),          "bus-id",       DRM_BUS_ID,  NULL);
+        g_object_set(G_OBJECT(data->sink),          "fullscreen-overlay", TRUE,  NULL);
+        g_object_set(G_OBJECT(data->sink),          "sync", FALSE,  NULL);
         if (demo_mode) {
             caps  = gst_caps_new_simple ("video/x-raw",
                                          "framerate", GST_TYPE_FRACTION, MAX_DEMO_MODE_FRAME_RATE, MAX_FRAME_RATE_DENOM,
@@ -268,7 +264,7 @@ set_pipeline_config (AppData *data) {
                 g_object_set (G_OBJECT (data->rawvparse),  "use-sink-caps", FALSE,                    NULL);
                 g_object_set (G_OBJECT (data->rawvparse),  "width",         width,                    NULL);
                 g_object_set (G_OBJECT (data->rawvparse),  "height",        height,                   NULL);
-                g_object_set (G_OBJECT (data->rawvparse),  "format",        GST_VIDEO_FORMAT_GRAY8,     NULL);
+                g_object_set (G_OBJECT (data->rawvparse),  "format",        parse_fmt,                NULL);
                 g_object_set (G_OBJECT (data->rawvparse),  "framerate",     MAX_DEMO_MODE_FRAME_RATE, MAX_FRAME_RATE_DENOM, NULL);
             }
         }
@@ -276,7 +272,7 @@ set_pipeline_config (AppData *data) {
     caps  = gst_caps_new_simple ("video/x-raw",
                                  "width",     G_TYPE_INT,        width,
                                  "height",    G_TYPE_INT,        height,
-                                 "format",    G_TYPE_STRING,     CAPTURE_FORMAT_Y8,
+                                 "format",    G_TYPE_STRING,     caps_fmt,
                                  "framerate", GST_TYPE_FRACTION, framerate, MAX_FRAME_RATE_DENOM,
                                  NULL);
     GST_DEBUG ("new Caps for src capsfilter %" GST_PTR_FORMAT, caps);
@@ -288,9 +284,9 @@ set_pipeline_config (AppData *data) {
                                  "width",     G_TYPE_INT,        width,
                                  "height",    G_TYPE_INT,        height,
                                  "stride-align",    G_TYPE_INT,  stride_align,
-                                 "format",    G_TYPE_STRING,     CAPTURE_FORMAT_Y8,
+                                 "format",    G_TYPE_STRING,     (dp == 0 ? caps_fmt : "GRAY8"),
                                  NULL);
-    GST_DEBUG ("new Caps for src capsfilter_op %" GST_PTR_FORMAT, caps);
+    GST_DEBUG ("new Caps for output capsfilter_op %" GST_PTR_FORMAT, caps);
 
     g_object_set (G_OBJECT (data->capsfilter_op),  "caps",  caps, NULL);
     gst_caps_unref (caps);
@@ -334,46 +330,46 @@ link_pipeline (AppData *data) {
     gint ret = DD_SUCCESS;
     if (!file_playback && !demo_mode) {
         if (dp ==0) {
-            if (!gst_element_link_many(data->capsfilter, data->q_raw, data->perf, data->sink, NULL)) {
-                GST_ERROR ("Error linking for capsfilter --> queue --> perf --> sink");
+            if (!gst_element_link_many(data->src, data->capsfilter, data->q_raw, data->perf, data->sink, NULL)) {
+                GST_ERROR ("Error linking for src --> capsfilter --> queue --> perf --> sink");
                 return DD_ERROR_PIPELINE_LINKING_FAIL;
             }
-            GST_DEBUG ("Linked for capsfilter --> queue --> perf --> sink successfully");
+            GST_DEBUG ("Linked for src --> capsfilter --> queue --> perf --> sink successfully");
         } else if (dp ==1) {
-            if (!gst_element_link_many(data->capsfilter, data->otsu, data->queue, data->preprocess, data->capsfilter_op, data->perf, data->sink, NULL)) {
-                GST_ERROR ("Error linking for capsfilter --> otsu --> queue --> preprocess --> perf --> sink");
+            if (!gst_element_link_many(data->src, data->capsfilter, data->otsu, data->queue, data->preprocess, data->capsfilter_op, data->perf, data->sink, NULL)) {
+                GST_ERROR ("Error linking for src --> capsfilter --> otsu --> queue --> preprocess --> perf --> sink");
                 return DD_ERROR_PIPELINE_LINKING_FAIL;
             }
-            GST_DEBUG ("Linking for capsfilter --> otsu --> queue --> preprocess --> perf --> sink successfully");
+            GST_DEBUG ("Linking for src --> capsfilter --> otsu --> queue --> preprocess --> perf --> sink successfully");
         } else if (dp ==2) {
-            if (!gst_element_link_many(data->capsfilter, data->otsu, data->queue, data->preprocess, data->q_raw, data->cca, \
+            if (!gst_element_link_many(data->src, data->capsfilter, data->otsu, data->queue, data->preprocess, data->q_raw, data->cca, \
                                         /*data->q_raw,*/ data->text2overlay, data->q_raw_1,data->capsfilter_op, data->perf, data->sink, NULL)) {
-                GST_ERROR ("Error linking for caps --> otsu --> q --> preprocess --> q --> cca --> text2overlay --> perf --> sink");
+                GST_ERROR ("Error linking for src --> caps --> otsu --> q --> preprocess --> q --> cca --> text2overlay --> perf --> sink");
                 return DD_ERROR_PIPELINE_LINKING_FAIL;
             }
-            GST_DEBUG ("Linking for caps --> otsu --> q --> preprocess --> q --> cca --> text2overlay --> perf --> sink successfully");
+            GST_DEBUG ("Linking for src --> caps --> otsu --> q --> preprocess --> q --> cca --> text2overlay --> perf --> sink successfully");
         }
     } else if (!file_playback && demo_mode) {
         if (dp ==0) {
-            if (!gst_element_link_many(data->capsfilter, data->videorate, data->capsfilter_vr, data->perf, data->sink, NULL)) {
-                GST_ERROR ("Error linking for capsfilter --> videorate --> capfilter --> perf --> sink");
+            if (!gst_element_link_many(data->src, data->capsfilter, data->videorate, data->capsfilter_vr, data->perf, data->sink, NULL)) {
+                GST_ERROR ("Error linking for src --> capsfilter --> videorate --> capfilter --> perf --> sink");
                 return DD_ERROR_PIPELINE_LINKING_FAIL;
             }
-            GST_DEBUG ("Linked for capsfilter --> videorate --> capfilter --> perf --> sink successfully");
+            GST_DEBUG ("Linked for src --> capsfilter --> videorate --> capfilter --> perf --> sink successfully");
         } else if (dp ==1) {
-            if (!gst_element_link_many(data->capsfilter, data->otsu, data->preprocess, data->videorate, \
+            if (!gst_element_link_many(data->src, data->capsfilter, data->otsu, data->preprocess, data->videorate, \
                                        data->capsfilter_vr, data->capsfilter_op, data->perf, data->sink, NULL)) {
-                GST_ERROR ("Error linking for caps --> otsu --> preprocess --> rate --> caps --> perf --> sink");
+                GST_ERROR ("Error linking for src --> caps --> otsu --> preprocess --> rate --> caps --> perf --> sink");
                 return DD_ERROR_PIPELINE_LINKING_FAIL;
             }
-            GST_DEBUG ("Linking for caps --> otsu --> preprocess --> rate --> caps --> perf --> sink successfully");
+            GST_DEBUG ("Linking for src --> caps --> otsu --> preprocess --> rate --> caps --> perf --> sink successfully");
         } else if (dp ==2) {
-            if (!gst_element_link_many(data->capsfilter, data->otsu,data->queue, data->preprocess,data->q_raw, data->cca, data->text2overlay, \
+            if (!gst_element_link_many(data->src, data->capsfilter, data->otsu,data->queue, data->preprocess,data->q_raw, data->cca, data->text2overlay, \
                                        data->q_raw_1, data->videorate, data->capsfilter_vr, data->capsfilter_op, data->perf, data->sink, NULL)) {
-                GST_ERROR ("Error linking for caps --> otsu --> pp --> cca --> text2overlay --> rate --> caps --> perf --> sink");
+                GST_ERROR ("Error linking for src --> caps --> otsu --> pp --> cca --> text2overlay --> rate --> caps --> perf --> sink");
                 return DD_ERROR_PIPELINE_LINKING_FAIL;
             }
-            GST_DEBUG ("Linking for caps --> otsu --> pp --> cca --> text2overlay --> rate --> caps --> perf --> sink successfully");
+            GST_DEBUG ("Linking for src --> caps --> otsu --> pp --> cca --> text2overlay --> rate --> caps --> perf --> sink successfully");
         } 
     } else if (file_playback && !demo_mode) {
         if (dp == 0) {
@@ -439,7 +435,7 @@ create_pipeline (AppData *data) {
     if (file_playback) {
         data->src               =  gst_element_factory_make("filesrc",      NULL);
     } else {
-        data->src               =  gst_element_factory_make("mediasrcbin",  NULL);
+        data->src               =  gst_element_factory_make("v4l2src",  NULL);
     }
     if (file_dump) {
         data->sink          =  gst_element_factory_make("filesink",     NULL);
@@ -464,7 +460,7 @@ create_pipeline (AppData *data) {
     data->text2overlay    =  gst_element_factory_make("vvas_xfilter",  "text2overlay");
     data->queue           =  gst_element_factory_make("queue",         NULL);
     data->q_raw           =  gst_element_factory_make("queue",         NULL);
-    data->q_raw_1           =  gst_element_factory_make("queue",         NULL);
+    data->q_raw_1         =  gst_element_factory_make("queue",         NULL);
     data->perf            =  gst_element_factory_make("perf",          "perf-raw");
     data->videorate       =  gst_element_factory_make("videorate",     NULL);
 
@@ -565,10 +561,28 @@ main (int argc, char **argv) {
     GST_DEBUG ("Width : %d", width);
     GST_DEBUG ("Height : %d", height);
     GST_DEBUG ("Framerate : %d", framerate);
+    GST_DEBUG ("Sensor format : %s", format);
     GST_DEBUG ("Display stage : %d", dp);
     GST_DEBUG ("File playback mode : %s", file_playback ? "TRUE" : "FALSE");
     GST_DEBUG ("File dump : %s", file_dump ? "TRUE" : "FALSE");
     GST_DEBUG ("Demo mode : %s", demo_mode ? "On" : "Off");
+
+    if (g_strcmp0 (format, "mono") == 0) {
+        parse_fmt = GST_VIDEO_FORMAT_GRAY8;
+        caps_fmt = (gchar *) "GRAY8";
+        block_size = width * height;
+        if (! config_path)
+	    config_path = mono_config_path;
+    } else if (g_strcmp0 (format, "color") == 0) {
+        parse_fmt = GST_VIDEO_FORMAT_RGB;
+        caps_fmt = (gchar *) "RGB";
+        block_size = width * height * 3; // RGB has 3 channels
+        if (! config_path)
+	    config_path = color_config_path;
+    } else {
+        g_printerr ("Sensor format '%s' not supported\n", format);
+        return -1;
+    }
 
     if (config_path)
         GST_DEBUG ("config path is %s", config_path);
@@ -581,6 +595,7 @@ main (int argc, char **argv) {
         g_printerr ("Exiting the app with an error: %s\n", error_to_string (ret));
         return ret;
     }
+
     if (demo_mode && file_dump){
         ret = DD_ERROR_FILE_DUMP_IN_DEMO_NOT_SUPPORTED;
         g_printerr ("Exiting the app with an error: %s\n", error_to_string (ret));
@@ -588,7 +603,7 @@ main (int argc, char **argv) {
     }
 
     if (access("/dev/dri/by-path/platform-fd4a0000.display-card", F_OK) != 0) {
-        g_printerr("ERROR: Mixer device is not ready.\n%s", msg_firmware);
+        g_printerr("ERROR: Display device is not ready.\n%s", msg_firmware);
         return -1;
     } else {
         exec("echo | modetest -M xlnx -D fd4a0000.display -s 43@41:1920x1080-60@BG24 -w 40:\"alpha\":255");
@@ -600,8 +615,8 @@ main (int argc, char **argv) {
     }
     if (!file_playback ) {
         std::string script_caller;
-        GST_DEBUG ("Calling default sensor calibration script");
-        script_caller = "echo | configure " + dev_node;
+        GST_DEBUG ("Calling sensor calibration script for %s sensor", format);
+        script_caller = "echo | configure -f " + std::string(format);
         exec(script_caller.c_str());
     }
     ret = create_pipeline (&data);
@@ -627,9 +642,6 @@ main (int argc, char **argv) {
     bus_watch_id = gst_bus_add_watch (bus, (GstBusFunc)(message_cb), &data);
     gst_object_unref (bus);
 
-    if (!file_playback) {
-        g_signal_connect (data.src, "pad-added", G_CALLBACK (pad_added_cb), &data);
-    }
     GST_DEBUG ("Triggering play command");
     if (GST_STATE_CHANGE_FAILURE == gst_element_set_state (data.pipeline, GST_STATE_PLAYING)) {
         g_printerr ("state change to Play failed\n");
@@ -652,40 +664,4 @@ CLOSE:
     if (out_file)
         g_free (out_file);
     return ret;
-}
-
-/** @brief
- *  This function will be called by the pad-added signal
- *
- *  mediasrcbin has sometimes pad for which pad-added signal
- *  is required to be attached with source element.
- *  This function will be called when pad is created and is
- *  ready to link with peer element.
- *
- *  @param src The GstElement to be connected with peer element.
- *  @param new_pad is the pad of source element which needs to be
- *  linked.
- *  @param data is the application structure pointer.
- *  @return Void.
- */
-static void
-pad_added_cb (GstElement *src, GstPad *new_pad, AppData *data) {
-    GstPadLinkReturn ret;
-    GstPad *sink_pad = gst_element_get_static_pad (data->capsfilter, "sink");
-    GST_DEBUG ("Received new pad '%s' from '%s':", GST_PAD_NAME (new_pad), GST_ELEMENT_NAME (src));
-
-    /* If our capsfilter is already linked, we have nothing to do here */
-    if (gst_pad_is_linked (sink_pad)) {
-        GST_DEBUG ("Pad is already linked. Ignoring");
-        goto exit;
-    }
-
-    /* Attempt the link */
-    ret = gst_pad_link (new_pad, sink_pad);
-    if (GST_PAD_LINK_FAILED (ret)) {
-        GST_ERROR ("Linking failed");
-    }
-exit:
-    /* Unreference the sink pad */
-    gst_object_unref (sink_pad);
 }
