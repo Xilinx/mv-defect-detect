@@ -252,7 +252,6 @@ set_pipeline_config (AppData *data) {
     } else {
         g_object_set(G_OBJECT(data->sink),          "bus-id",       DRM_BUS_ID,  NULL);
         g_object_set(G_OBJECT(data->sink),          "fullscreen-overlay", TRUE,  NULL);
-        g_object_set(G_OBJECT(data->sink),          "sync", FALSE,  NULL);
         if (demo_mode) {
             caps  = gst_caps_new_simple ("video/x-raw",
                                          "framerate", GST_TYPE_FRACTION, MAX_DEMO_MODE_FRAME_RATE, MAX_FRAME_RATE_DENOM,
