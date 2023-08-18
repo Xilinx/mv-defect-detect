@@ -72,6 +72,16 @@ Architecture
    Hardware Architecture of the Accelerator <docs/hw_arch_accel_dd>
 
 
+*******************************
+Repository
+*******************************
+
+.. toctree::
+  :maxdepth: 1
+  
+  Software Repository <https://github.com/Xilinx/mv-defect-detect>
+
+
 ******
 Other
 ******
