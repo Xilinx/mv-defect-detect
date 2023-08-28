@@ -93,12 +93,14 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
 
     kernel_priv = (KernelPriv *)handle->kernel_priv;
 
-    uint8_t *frwd_pass;
+    if (inframe->app_priv == NULL)
+        LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "inframe app_priv is NULL");
+
     GstInferenceMeta *infer_meta;
     infer_meta = ((GstInferenceMeta *) gst_buffer_get_meta((GstBuffer *)inframe->app_priv,
                                                                  gst_inference_meta_api_get_type()));
     if (infer_meta == NULL) {
-        LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "vvas meta data is not available for crop");
+        LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "vvas meta data is not available");
         return FALSE;
     }
     uint32_t *mango_pixel, *defect_pixel;
@@ -108,10 +110,12 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
 
     for (GSList *child_predictions = tmp; child_predictions; child_predictions = g_slist_next(child_predictions)) {
         GstInferencePrediction *child = (GstInferencePrediction *)child_predictions->data;
-        frwd_pass =   (uint8_t *) child->reserved_1;
-        mango_pixel = (uint32_t *)child->reserved_2;
+        mango_pixel = (uint32_t *)child->reserved_1;
     }
-    ret = vvas_kernel_start (handle, "ppppuuu", input[0]->paddr[0], frwd_pass, \
+
+    LOG_MESSAGE (LOG_LEVEL_DEBUG, kernel_priv->log_level, "kernel start: img in %ld, fwd in %ld", input[0]->paddr[0], input[0]->paddr[1]);
+
+    ret = vvas_kernel_start (handle, "ppppuuu", input[0]->paddr[0], input[0]->paddr[1], \
                              output[0]->paddr[0], kernel_priv->mem->paddr[0], \
                              input[0]->props.height, output[0]->props.width, \
                              kernel_priv->stride_value);
@@ -125,6 +129,8 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
         return FALSE;
     }
 
+    LOG_MESSAGE (LOG_LEVEL_DEBUG, kernel_priv->log_level, "kernel done");
+
     /* wait for kernel completion */
     ret = vvas_kernel_done (handle, 1000);
     if (ret < 0) {
@@ -133,6 +139,9 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
     }
     g_slist_free(tmp);
     defect_pixel =  kernel_priv->mem->vaddr[0];
+
+    if (outframe->app_priv == NULL)
+        LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "outframe app_priv is NULL");
 
     infer_meta = (GstInferenceMeta *) gst_buffer_add_meta ((GstBuffer *) outframe->app_priv,
                                                       gst_inference_meta_get_info (), NULL);

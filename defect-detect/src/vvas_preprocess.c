@@ -28,7 +28,7 @@ typedef struct _kern_priv
     int max_value;
     int stride_value;
     int log_level;
-    VVASFrame *tmp_mem, *mem;
+    VVASFrame *mem;
 } PreProcessingKernelPriv;
 
 int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NUM_OBJECT], VVASFrame *output[MAX_NUM_OBJECT]);
@@ -40,8 +40,6 @@ uint32_t xlnx_kernel_deinit(VVASKernel *handle)
 {
     PreProcessingKernelPriv *kernel_priv;
     kernel_priv = (PreProcessingKernelPriv *)handle->kernel_priv;
-    if (kernel_priv->tmp_mem)
-        vvas_free_buffer (handle, kernel_priv->tmp_mem);
     if (kernel_priv->mem)
         vvas_free_buffer (handle, kernel_priv->mem);
     if (kernel_priv)
@@ -54,7 +52,6 @@ int32_t xlnx_kernel_init(VVASKernel *handle)
     json_t *jconfig = handle->kernel_config;
     json_t *val; /* kernel config from app */
     PreProcessingKernelPriv *kernel_priv;
-    uint32_t resolution;
 
     kernel_priv = (PreProcessingKernelPriv *)calloc(1, sizeof(PreProcessingKernelPriv));
     if (!kernel_priv) {
@@ -82,9 +79,6 @@ int32_t xlnx_kernel_init(VVASKernel *handle)
 	    kernel_priv->stride_value = json_integer_value (val);
     LOG_MESSAGE (LOG_LEVEL_INFO, kernel_priv->log_level, "VVAS PPE: stride_value %d", kernel_priv->stride_value);
 
-    resolution = kernel_priv->stride_value * 1080;
-
-    kernel_priv->tmp_mem   = vvas_alloc_buffer (handle, resolution*(sizeof(uint8_t)), VVAS_INTERNAL_MEMORY, DEFAULT_MEM_BANK, NULL);
     kernel_priv->mem = vvas_alloc_buffer (handle, 1*(sizeof(uint32_t)), VVAS_INTERNAL_MEMORY, DEFAULT_MEM_BANK, NULL);
 
     handle->kernel_priv = (void *)kernel_priv;
@@ -101,12 +95,16 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
     VVASFrame *inframe  = input[0];
     VVASFrame *outframe = output[0];
     kernel_priv = (PreProcessingKernelPriv *)handle->kernel_priv;
+
+    if (inframe->app_priv == NULL)
+        LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "inframe app_priv is NULL");
+
     GstInferenceMeta *infer_meta = ((GstInferenceMeta *)gst_buffer_get_meta((GstBuffer *)
                                                                 inframe->app_priv,
                                                                 gst_inference_meta_api_get_type()));
     if (infer_meta == NULL)
     {
-        LOG_MESSAGE(LOG_LEVEL_INFO, kernel_priv->log_level, "vvas meta data is not available for crop");
+        LOG_MESSAGE(LOG_LEVEL_INFO, kernel_priv->log_level, "vvas meta data is not available");
         return FALSE;
     }
     GstInferencePrediction *root = infer_meta->prediction;
@@ -120,8 +118,10 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
 
     kernel_priv->threshold = *thr - NORMALIZE_THRESHOLD;
 
+    LOG_MESSAGE (LOG_LEVEL_DEBUG, kernel_priv->log_level, "kernel start: img out %ld, fwd out %ld", output[0]->paddr[0], output[0]->paddr[1]);
+
     ret = vvas_kernel_start (handle, "ppppuuuuu", input[0]->paddr[0], output[0]->paddr[0], \
-                             kernel_priv->tmp_mem->paddr[0], kernel_priv->mem->paddr[0], \
+                             output[0]->paddr[1], kernel_priv->mem->paddr[0], \
                              kernel_priv->threshold, kernel_priv->max_value, input[0]->props.height, \
                              input[0]->props.width, kernel_priv->stride_value);
     if (ret < 0) {
@@ -135,12 +135,17 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
         LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "Failed to receive response from kernel");
         return FALSE;
     }
+
+    LOG_MESSAGE (LOG_LEVEL_DEBUG, kernel_priv->log_level, "kernel done");
+
     g_slist_free(tmp);
 
-/* Added below code to append meta data */
+    /* Added below code to append meta data */
     uint32_t *mango_pix;
-    uint8_t *buf_ptr =  (uint8_t *)kernel_priv->tmp_mem->paddr[0];
     mango_pix =  kernel_priv->mem->vaddr[0];
+
+    if (outframe->app_priv == NULL)
+        LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "outframe app_priv is NULL");
 
     infer_meta = (GstInferenceMeta *) gst_buffer_add_meta ((GstBuffer *)outframe->app_priv,
                                                      gst_inference_meta_get_info (), NULL);
@@ -161,13 +166,12 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
     predict = gst_inference_prediction_new ();
 
     a = gst_inference_classification_new_full (-1, 0.0, "FORWARD PASS IMAGE", 0, NULL, NULL, NULL);
-    predict->reserved_1 = (void *)buf_ptr;
-    predict->reserved_2 = (void *)mango_pix;
+    predict->reserved_1 = (void *)mango_pix;
     gst_inference_prediction_append_classification (predict, a);
 
     gst_inference_prediction_append (infer_meta->prediction, predict);
 
-/* End of the code to append the meta data */
+    /* End of the code to append the meta data */
     return TRUE;
 }
 
