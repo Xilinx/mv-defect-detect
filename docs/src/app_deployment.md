@@ -36,7 +36,7 @@ This document shows how to set up the board and run the **MV-Defect Detect** and
 
 7. Fiber Optic cable
 
-8. Sony IMX547 Monochrome Camera sensor Module
+8. [Sony IMX547 Monochrome Camera sensor Module](https://www.xilinx.com/products/som/kria/kr260-robotics-starter-kit/imx547-camera-kit-monochrome.html) OR [Sony IMX547 Color Camera sensor Module](https://www.xilinx.com/products/som/kria/kr260-robotics-starter-kit/imx547-camera-kit-color.html)
 
 9. 10G NIC Card
 
@@ -147,21 +147,21 @@ The KR260 board connection should be as shown in the following figure:
 
 ### Host Machine Setup
 
-Check the available network interfaces before inserting the 10G NIC card using:
+* Check the available network interfaces before inserting the 10G NIC card using:
 
-- `ifconfig -a` for ubuntu host
-- `ipconfig /all` for windows host
+  - `ifconfig -a` for ubuntu host
+  - `ipconfig /all` for windows host
 
-Install the 10Gb PCIe NIC Network Card in the PCIe slot as shown in the following figure:
+* Install the 10Gb PCIe NIC Network Card in the PCIe slot as shown in the following figure:
 
-![Host Machine Setup](media/Host_machine_setup.png)
+  ![Host Machine Setup](media/Host_machine_setup.png)
 
-Connect the fiber optic cable one end to the NIC card in host machine and the other end to the KR260 board SFP+ connector.
+* Connect the fiber optic cable one end to the NIC card in host machine and the other end to the KR260 board SFP+ connector.
 
-The newly inserted NIC card shows the new interface in the host machine. You can run the same command to verify that:
+* The newly inserted NIC card shows the new interface in the host machine. You can run the same command to verify that:
 
-- `ifconfig -a` for ubuntu host
-- `ipconfig /all` for windows host
+  - `ifconfig -a` for ubuntu host
+  - `ipconfig /all` for windows host
 
 **Note:** On windows host, ensure that the network related drivers are installed from the [link](https://www.euresys.com/en/Products/IP-Cores/Vision-Standard-IP-Cores-for-FPGA/GigE-Vision-IP-Core-(2)), before running the Host Sphinx application.
 
@@ -175,27 +175,31 @@ Install the latest application packages.
 
 1. Get the list of available packages in the feed:
 
-      `sudo xmutil getpkgs`
+      ```bash
+        sudo xmutil getpkgs
+      ```
 
 2. Install the application.
 
-    `sudo apt install xlnx-firmware-kr260-mv-camera`
+    ```bash
+      sudo apt install xlnx-firmware-kr260-mv-camera
+    ```
 
     > ***Note***: Installing firmware binaries might cause dfx-mgr to crash and a restart is needed, which is listed in the [Known issues and Limitations](known_issues.md) section. Once this is fixed, newer updates are available for the dfx-manager and restart might not be needed.
 
 ## Docker based application preparation
 
-Pull the latest docker image for mv-defect-detect using the following command.
+* Pull the latest docker image for mv-defect-detect using the following command.
 
-```bash
+  ```bash
     sudo docker pull xilinx/mv-defect-detect:2022.1
-```
+  ```
 
-Find the images installed with the following command:
+* Find the images installed with the following command:
 
-```bash
-sudo docker images
-```
+  ```bash
+    sudo docker images
+  ```
 
 ## Firmware Loading
 
@@ -225,25 +229,29 @@ The MV-Camera application firmware consists of bitstream (bit.bin) and device tr
       sudo xmutil listapps
     ```
 
-To list the available accelerator applications, run:
+* To list the available accelerator applications, run:
 
-`sudo xmutil listapps`
+    ```bash
+      sudo xmutil listapps
+    ```
 
 > ***Note***: The Active_Slot column shows the application firmware that is currently loaded in the system. The value '-1' indicates that the firmware is not loaded, while the value of '0' indicates that the firmware is loaded. By default, only the *k26-starter-kits* firmware is loaded.
 
-To load the MV-Camera application firmware, unload the existing firmware and then load the MV-Camera application firmware:
+* To load the MV-Camera application firmware, unload the existing firmware and then load the MV-Camera application firmware:
 
-`sudo xmutil unloadapp`
-
-`sudo xmutil loadapp kr260-mv-camera`
+    ```bash
+      sudo xmutil unloadapp
+      sudo xmutil loadapp kr260-mv-camera-mono      //For Monochrome Sensor
+      sudo xmutil loadapp kr260-mv-camera-color     //For Color Sensor
+    ```
 
 ## Launching the Docker
 
-Launch the docker using the below command. The firmware must be loaded before launching the docker container.
+* Launch the docker using the below command. The firmware must be loaded before launching the docker container.
 
-```bash
-    sudo docker run \
-    --env="DISPLAY" \
+  ```bash
+      sudo docker run \
+        --env="DISPLAY" \
         --env="XDG_SESSION_TYPE" \
         --net=host \
         --privileged \
@@ -256,13 +264,13 @@ Launch the docker using the below command. The firmware must be loaded before la
         -v /run:/run \
         -h "xlnx-docker" \
         -it xilinx/mv-defect-detect:2022.1 bash
-```
+  ```
 
-  It launches the mv-defect-detect docker image container.
+*  It launches the mv-defect-detect docker image container.
 
-```bash
-    root@xlnx-docker/#
-```
+  ```bash
+      root@xlnx-docker/#
+  ```
 
 ## Running the 10GigE Application on Target
 
@@ -274,10 +282,24 @@ To run the application, follow the steps mentioned below:
 
 1. Run the configure script to configure the media nodes and the IPs in the capture path.
 
-    `configure`
+    ```bash
+      configure -f mono         //For Monochrome Sensor
+      configure -f color        //For Color Sensor
+    ```
 
-    `update_eeprom_wrapper`
+2. Set Static IP address on the SFP eth interface on the KR260. It should be under same subnet as Host Machines SFP IP
 
+    ```bash
+      #Example
+      busybox ifconfig eth2 down
+      busybox ifconfig eth2 192.168.0.19
+    ```
+
+3. Run the eeprom wrapper script.
+
+    ```bash
+      update_eeprom_wrapper
+    ```
     It asks the user to give a few inputs and gets the following logs (the size of the following xml file might vary):
 
     ```
@@ -303,13 +325,13 @@ To run the application, follow the steps mentioned below:
 
     > ***Note***: Select 1 or 2 based on the user network configuration (static or dynamic). If you opt for the static option, enter the following details as well. Below are the example values for the reference.
     >
-    > Input ip address (xxx.xxx.xxx.xxx): **192.168.174.10**
+    > Input ip address (xxx.xxx.xxx.xxx): **192.168.0.19**
     >
     > Input netmask (xxx.xxx.xxx.xxx): **255.255.255.0**
     >
-    > Input gateway (xxx.xxx.xxx.xxx):**192.168.174.11**
+    > Input gateway (xxx.xxx.xxx.xxx):**192.168.0.20**
 
-2. Run the following command and get the interface name, which has memory address like **memory 0xa0060000-a006ffff**.
+4. Run the following command and get the interface name, which has memory address like **memory 0xa0060000-a006ffff**.
 
     a.  `ifconfig -a`
 
@@ -322,30 +344,35 @@ To run the application, follow the steps mentioned below:
         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
         device interrupt 66  memory 0xa0060000-a006ffff
     ```
-
       Keyword **memory 0xa0060000-a006ffff** belongs to eth2 port. This interface information is required to feed while running gvrd application on target.
 
-3. Run the *gst-launch* command in the background to trigger the pipeline.
+5. Run the *gst-launch* command in the background to trigger the pipeline.
 
     For 60 fps, run either the following gst launch command or mv-defect-detect application.
 
     ```bash
-    media-ctl -d /dev/media0 -V "\"imx547 7-001a\":0 [fmt:SRGGB10_1X10/1920x1080 field:none @1/60]"
-    gst-launch-1.0 v4l2src device=/dev/video0 io-mode=4 ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 !  queue ! fakevideosink -v &
+      #For Monochrome Sensor
+      gst-launch-1.0 v4l2src device=/dev/video0 io-mode=4 ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 !  queue ! fakevideosink -v &
+
+      #For Color Sensor
+      gst-launch-1.0 v4l2src device=/dev/video0 io-mode=4 ! video/x-raw, width=1920, height=1080, format=RGB, framerate=60/1 !  queue ! fakevideosink -v &
     ```
-    
+
     For 120 fps, run the following commands:
 
     ***Note***: MV-Defect-Detect application does not support 120 fps.
 
     ```bash
-    media-ctl -d /dev/media0 -V "\"imx547 7-001a\":0 [fmt:SRGGB10_1X10/1920x1080 field:none @1/120]"
-    gst-launch-1.0 v4l2src device=/dev/video0 io-mode=4 ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=120/1 !  queue ! fakevideosink -v &
+      #For Monochrome Sensor
+      gst-launch-1.0 v4l2src device=/dev/video0 io-mode=4 ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=120/1 !  queue ! fakevideosink -v &
+
+      #For Color Sensor
+      gst-launch-1.0 v4l2src device=/dev/video0 io-mode=4 ! video/x-raw, width=1920, height=1080, format=RGB, framerate=120/1 !  queue ! fakevideosink -v &
     ```
 
    > ***Note***: Make sure to terminate the gst-launch process before unloading xlnx-app-kr260-mv-camera.
 
-4. Run the following command to run the gvrd application.
+6. Run the following command to run the gvrd application.
 
       ```bash
       gvrd \<10gige port detail\>
@@ -359,7 +386,7 @@ To run the application, follow the steps mentioned below:
     > sudo xmutil unloadapp
     >```
 
-5. On Host PC to run the Sphinx application:
+7. On Host PC to run the Sphinx application:
 
     Sphinx GEV Viewer can be downloaded from [here](https://www.euresys.com/en/About-us/Blog-event/News/New-GigE-Vision-Viewer-for-AMD-Xilinx-Kria-KR260-R) along with Sphinx GEV Viewer user guide link to run the Sphinx application.
 
@@ -369,7 +396,7 @@ To run the application, follow the steps mentioned below:
 
     - On ubuntu : sudo ifconfig <10G network interface> <IPv4 adress> up
 
-        For Example: `sudo ifconfig enp23s0 192.168.174.80 up`
+        For Example: `sudo ifconfig enp23s0 192.168.0.10 up`
 
     - On Windows : Set from network settings – IPv4 IP
 
@@ -388,9 +415,45 @@ To run the application, follow the steps mentioned below:
         * In Advanced section, select **Jumbo Frame**,
         * In the Value field **Value** – select 9KB MTU s.
 
-    c). Download [xgvrd-kr260.xml](https://github.com/Xilinx/mv-defect-detect/blob/xlnx_rel_v2022.1/10gige/application/xgvrd-kr260.xml) into the host machine. In sphinx GEV viewer application, set the downloaded xml file path in the GUI.
+    c). Sphinx GEV Viewer GUI start-up window should look something like below image. If all the control elements are not 
+    visible, you can reduce the size of text, apps and other items in the Display settings.
 
-    d). In Sphinx host application, select *Use filter Driver* checkbox, and *Grab* checkbox to capture the frames from KR260 10GigE network.
+      ![GUI-Window](./media/GUI-Window.JPG)
+    
+    d). On the Sphinx GUI click on `Discovery` to establish a connection from KR260 over SFP. Then click on
+    Discovery --> Open
+
+      ![Sphinx_Discovert](./media/Sphinx_Discovery.JPG)
+
+    e). To get the maximum fps in the Sphinx GUI, you can change the draw value in Sphinx --> Options based on the host type  (windows or ubuntu)
+
+      - On ubuntu host,
+
+        For 60 fps, set the draw value to `10`.
+
+        For 120 fps, set the draw value to `50`.
+
+      - On windows host,
+
+         For 60/120 fps, set the draw value to `10`.
+
+         ![Sphinx GE Viewer](media/Sphinx_GE_Viewer.png)
+
+    f). Download [xgvrd-kr260.xml](https://github.com/Xilinx/mv-defect-detect/blob/xlnx_rel_v2022.1/10gige/application/xgvrd-kr260.xml) into the host machine. In sphinx GEV viewer application, set the downloaded xml file path in the GUI.
+
+    g). In Sphinx host application, select *Use filter Driver* checkbox, and *Grab* checkbox to capture the frames from KR260 10GigE network.
+
+## Sphinx GEV Viewer Observations
+
+  * For 60 fps on a Monochrome Sensor
+
+      ![60fps_mono](./media/60fps_Mono.png)
+
+  * For 120 fps on a Monochrome Sensor
+
+      ![120fps_mono](./media/120fps_Mono.JPG)
+
+  **NOTE**: You will record ~40-50 fps for a 60 fps pipeline and ~90-100 fps for a 120 fps pipeline.
 
 ## Running the MV-Defect-Detect Application
 
