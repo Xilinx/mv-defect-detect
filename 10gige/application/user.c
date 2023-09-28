@@ -336,12 +336,12 @@ void user_init(u8 fdevice)
 {
     // Set the default video parameters
     video_width      = 2472;
-    video_height     = 2128;
+    video_height     = 2064;
     video_offs_x     = 0;
     video_offs_y     = 0;
     gige_set_user_register(fdevice, video_pixfmt, GVSP_PIX_MONO16);
     video_max_width  = 2472;
-    video_max_height = 2128;
+    video_max_height = 2064;
     video_acq_mode   = ACQ_MODE_CONTINUOUS;
     updatebpp(gige_get_user_register(fdevice, video_pixfmt));
     video_gendc_en   = 0;
