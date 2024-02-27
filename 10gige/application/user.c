@@ -332,14 +332,14 @@ void action_trigger(u8 device, u32 *sig)
 //   color = zero if assembled MT9V022 sensor is grayscale version, nonzero
 //           for color (Bayer pattern) variant
 //
-void user_init(u8 fdevice)
+void user_init(u8 fdevice, u32 stream_format)
 {
     // Set the default video parameters
     video_width      = 2472;
     video_height     = 2064;
     video_offs_x     = 0;
     video_offs_y     = 0;
-    gige_set_user_register(fdevice, video_pixfmt, GVSP_PIX_MONO16);
+    gige_set_user_register(fdevice, video_pixfmt, stream_format);
     video_max_width  = 2472;
     video_max_height = 2064;
     video_acq_mode   = ACQ_MODE_CONTINUOUS;
@@ -420,7 +420,7 @@ void user_callback(u8 fdevice)
 //
 // return value = event specific
 //
-u32 gige_event(u8 device, u32 id, u32 param, void *data)
+u32 gige_event(u8 device, u32 id, u32 param, void *data, u32 stream_format)
 {
     static u32 gendc_en_latch = 0;
     u32 ret = 0, val;
@@ -500,7 +500,7 @@ u32 gige_event(u8 device, u32 id, u32 param, void *data)
             gendc_en_latch    = 0;                                                          // Disable GenDC mode
             video_gendc_en    = 0;
             video_gendc_mode  = 0;
-            gige_set_user_register(device, video_pixfmt, GVSP_PIX_MONO16);
+            gige_set_user_register(device, video_pixfmt, stream_format);
             video_bpp         = 8;
             gige_set_user_register(device, framebuf_pld_type, PLD_IMAGE);
             gendc_update(device, video_width, video_height, framebuf_pad_x, framebuf_pad_y, video_bpp, video_gendc_en);
@@ -555,6 +555,7 @@ static void updatebpp(uint32_t pixfmt)
     switch(pixfmt)
     {
     case GVSP_PIX_MONO8:
+    case GVSP_PIX_BAYRG8:
         video_bpp = 8;
         break;
     case GVSP_PIX_MONO10:

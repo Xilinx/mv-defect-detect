@@ -40,6 +40,7 @@
 static int exit_flag = 0;  /* SIGINT, SIGTERM, SIGQUIT */
 
 u8 device = 1;
+u32 stream_format;  // Stream Format
 
 static void sigexit(int sig)
 {
@@ -113,7 +114,8 @@ int main(int argc, char* argv[])
 {
     INIT_PARAM init_param;
     u32 help;
-	char interface_name[10];
+    char interface_name[10];
+    char sensor[10];
 
     printf("GVRD\n");
 
@@ -138,13 +140,34 @@ int main(int argc, char* argv[])
     init_param.sensor_write_delay = 0;        // None
     init_param.lib_mode           = DEV_MODE_TX;   // sender
 
-    // set network interface name
-	if(argc == 2)
-		strcpy((char *)interface_name, argv[1]);
-	else
-		strcpy((char *)interface_name, "eth0");
+    // Parse user args
+    if (argc == 3)
+    {
+        strcpy((char *)init_param.interface_name, argv[1]);
+        strcpy((char *)sensor, argv[2]);
+    }
+    else
+    {
+        printf("Usage: gvrd <sfp_eth_interface> mono|color\n");
+        exit(0);
+    }
 
-	strcpy((char *)init_param.interface_name, interface_name);
+    // Set Format based on sensor
+    if (!(strcmp(sensor, "mono")))
+    {
+        printf("Using MONO8 Format\n");
+        stream_format = GVSP_PIX_MONO8;
+    }
+    else if (!(strcmp(sensor, "color")))
+    {
+        printf("Using BAYRG8 Format\n");
+        stream_format = GVSP_PIX_BAYRG8;
+    }
+    else
+    {
+        printf("Unsupported sensor format %s, use 'mono' or 'color' instead\n",sensor);
+        exit(0);
+    }
 
     // This callback function must be always implemented!
     // It is called by the libGigE
@@ -196,7 +219,7 @@ int main(int argc, char* argv[])
     gige_set_data_rates(device, 200, 10000);            // f(tx_stm_clk) = 100MHz, 1Gbps Ethernet link
 
     // Initialize user settings
-    user_init(device);
+    user_init(device, stream_format);
 
     // Initialize flash
     flash_init();
