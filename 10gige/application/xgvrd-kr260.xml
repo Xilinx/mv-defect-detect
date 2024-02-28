@@ -435,6 +435,10 @@
                 <DisplayName>Mono 16</DisplayName>
                 <Value>0x01100007</Value>
             </EnumEntry>
+            <EnumEntry Name="BayRG8" NameSpace="Standard">
+                <DisplayName>BayRG 8</DisplayName>
+                <Value>0x01080009</Value>
+            </EnumEntry>
             <pValue>PixelFormatReg</pValue>
         </Enumeration>
     </Group>

@@ -232,6 +232,7 @@ typedef struct
 #define GVSP_PIX_BAYRG12                0x01100011
 #define GVSP_PIX_BAYGB12                0x01100012
 #define GVSP_PIX_BAYBG12                0x01100013
+#define GVSP_PIX_BAYRG16                0x0110002F
 #define GVSP_PIX_RGB8_PACKED            0x02180014
 #define GVSP_PIX_BGR8_PACKED            0x02180015
 #define GVSP_PIX_RGBA8_PACKED           0x02200016

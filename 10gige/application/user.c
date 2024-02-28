@@ -339,7 +339,7 @@ void user_init(u8 fdevice)
     video_height     = 2128;
     video_offs_x     = 0;
     video_offs_y     = 0;
-    gige_set_user_register(fdevice, video_pixfmt, GVSP_PIX_MONO16);
+    gige_set_user_register(fdevice, video_pixfmt, GVSP_PIX_BAYRG8);
     video_max_width  = 2472;
     video_max_height = 2128;
     video_acq_mode   = ACQ_MODE_CONTINUOUS;
@@ -500,7 +500,7 @@ u32 gige_event(u8 device, u32 id, u32 param, void *data)
             gendc_en_latch    = 0;                                                          // Disable GenDC mode
             video_gendc_en    = 0;
             video_gendc_mode  = 0;
-            gige_set_user_register(device, video_pixfmt, GVSP_PIX_MONO16);
+            gige_set_user_register(device, video_pixfmt, GVSP_PIX_BAYRG8);
             video_bpp         = 8;
             gige_set_user_register(device, framebuf_pld_type, PLD_IMAGE);
             gendc_update(device, video_width, video_height, framebuf_pad_x, framebuf_pad_y, video_bpp, video_gendc_en);
@@ -554,12 +554,12 @@ static void updatebpp(uint32_t pixfmt)
 {
     switch(pixfmt)
     {
-    case GVSP_PIX_MONO8:
+    case GVSP_PIX_BAYRG8:
         video_bpp = 8;
         break;
-    case GVSP_PIX_MONO10:
-    case GVSP_PIX_MONO12:
-    case GVSP_PIX_MONO16:
+    case GVSP_PIX_BAYRG10:
+    case GVSP_PIX_BAYRG12:
+    case GVSP_PIX_BAYRG16:
         video_bpp = 16;
         break;
     default:
