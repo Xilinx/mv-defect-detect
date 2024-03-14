@@ -4,7 +4,7 @@
    </td>
  </tr>
  <tr>
- <td align="center"><h1>Machine Vision Camera Tutorial</h1>
+ <td align="center"><h1>10GigE Machine Vision Camera Tutorial</h1>
  
  </td>
  </tr>
@@ -12,7 +12,7 @@
 
 # Overview
 
-The Machine Vision (MV) Camera Application uses a Sony IMX547 sensor module, which interfaces to the KR260 with the widely adopted SLVS-EC interface standard.
+The Machine Vision (MV) Camera Defect Detect Application uses a Sony IMX547 sensor module, which interfaces to the KR260 with the widely adopted SLVS-EC interface standard.
 
 The FPGA implements a SLVS-EC receiver IP core that is provided by third-party IP company [Framos](https://www.framos.com/framos-slvs-ec-rx-ip-core) and a 10GigE Vision pipeline using a series of IP cores from third-party IP company [Sensor-to-Image](https://www.euresys.com/en/Products/IP-Cores/Vision-Standard-IP-Cores-for-FPGA/GigE-Vision-IP-Core-(2)). As these third-party IPs are not open-source, contact the third-party contacts via [Product Inquiry](https://www.xilinx.com/products/app-store/kria/10gige-vision-camera/product-inquiry.html) to create custom and product designs.
 

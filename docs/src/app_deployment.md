@@ -10,7 +10,7 @@
  </tr>
 </table>
 
-# Machine Vision Application Deployment
+# 10GigE Machine Vision Defect Detect Application Deployment
 
 ## Introduction to the Test Environment
 
