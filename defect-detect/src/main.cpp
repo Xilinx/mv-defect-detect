@@ -287,10 +287,10 @@ set_pipeline_config (AppData *data) {
 
     g_object_set (G_OBJECT (data->capsfilter_op),  "caps",  caps, NULL);
     gst_caps_unref (caps);
-    if (file_dump){
-    config_file.append(PRE_PROCESS_JSON_FILE);
-    }else{
-    config_file.append(PRE_PROCESS_STRIDE_JSON_FILE);
+    if (file_dump) {
+        config_file.append(PRE_PROCESS_JSON_FILE);
+    } else {
+        config_file.append(PRE_PROCESS_STRIDE_JSON_FILE);
     }
     g_object_set (G_OBJECT(data->preprocess), "kernels-config", config_file.c_str(), NULL);
     GST_DEBUG ("Config file path is %s", config_file.c_str());
