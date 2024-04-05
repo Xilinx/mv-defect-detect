@@ -74,7 +74,6 @@ static gchar *msg_firmware = (gchar *)"Load the HW accelerator firmware first. U
 static gchar* out_file = NULL;
 guint width =  1920;
 guint height = 1080;
-guint stride_align = 256;
 guint dp = 0;
 guint framerate = 60;
 gint block_size;
@@ -282,7 +281,6 @@ set_pipeline_config (AppData *data) {
     caps  = gst_caps_new_simple ("video/x-raw",
                                  "width",     G_TYPE_INT,        width,
                                  "height",    G_TYPE_INT,        height,
-                                 "stride-align",    G_TYPE_INT,  stride_align,
                                  "format",    G_TYPE_STRING,     (dp == 0 ? caps_fmt : "GRAY8"),
                                  NULL);
     GST_DEBUG ("new Caps for output capsfilter_op %" GST_PTR_FORMAT, caps);
