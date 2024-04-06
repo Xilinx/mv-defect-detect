@@ -18,12 +18,14 @@
 #include <vvas/vvas_kernel.h>
 #include <gst/vvas/gstinferencemeta.h>
 
+#define DEFAULT_STRIDE_VALUE        1920
 #define MAX_SUPPORTED_WIDTH         1920
 #define MAX_SUPPORTED_HEIGHT        1080
 
 typedef struct _kern_priv
 {
     int log_level;
+    int stride_value;
     VVASFrame *mem;
     VVASFrame *mango_pix;
     VVASFrame *defect_pix;
@@ -70,6 +72,13 @@ int32_t xlnx_kernel_init(VVASKernel *handle)
 	    kernel_priv->log_level = json_integer_value (val);
     LOG_MESSAGE (LOG_LEVEL_INFO, kernel_priv->log_level, "VVAS PPE: debug_level %d", kernel_priv->log_level);
 
+    val = json_object_get (jconfig, "stride_value");
+    if (!val || !json_is_integer (val))
+            kernel_priv->stride_value = DEFAULT_STRIDE_VALUE;
+    else
+            kernel_priv->stride_value = json_integer_value (val);
+    LOG_MESSAGE (LOG_LEVEL_INFO, kernel_priv->log_level, "VVAS PPE: stride_value %d", kernel_priv->stride_value);
+
     handle->kernel_priv = (void *)kernel_priv;
     handle->is_multiprocess = 1;
     return 0;
@@ -102,9 +111,10 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
         frwd_pass =   (uint8_t *) child->reserved_1;
         mango_pixel = (uint32_t *)child->reserved_2;
     }
-    ret = vvas_kernel_start (handle, "puppuu", input[0]->paddr[0], frwd_pass, \
+    ret = vvas_kernel_start (handle, "ppppuuu", input[0]->paddr[0], frwd_pass, \
                              output[0]->paddr[0], kernel_priv->mem->paddr[0], \
-                             input[0]->props.height, output[0]->props.stride);
+                             input[0]->props.height, output[0]->props.width, \
+                             kernel_priv->stride_value);
 #if 0
     ret = vvas_kernel_start (handle, "puppuu", input[0]->paddr[0], frwd_pass, \
                              output[0]->paddr[0], kernel_priv->mem->paddr[0], \
