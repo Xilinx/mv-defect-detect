@@ -33,6 +33,7 @@ GST_DEBUG_CATEGORY (defectdetect_app);
 #define PRE_PROCESS_STRIDE_JSON_FILE "preprocess-accelarator-stride.json"
 #define OTSU_ACC_JSON_FILE           "otsu-accelarator.json"
 #define CCA_ACC_JSON_FILE            "cca-accelarator.json"
+#define CCA_ACC_STRIDE_JSON_FILE     "cca-accelarator-stride.json"
 #define TEXT_2_OVERLAY_JSON_FILE     "text2overlay.json"
 #define DRM_BUS_ID                   "fd4a0000.display"
 #define MAX_WIDTH                    1920
@@ -287,10 +288,10 @@ set_pipeline_config (AppData *data) {
 
     g_object_set (G_OBJECT (data->capsfilter_op),  "caps",  caps, NULL);
     gst_caps_unref (caps);
-    if (file_dump) {
-        config_file.append(PRE_PROCESS_JSON_FILE);
-    } else {
+    if (dp == 1 && !file_dump) {
         config_file.append(PRE_PROCESS_STRIDE_JSON_FILE);
+    } else {
+        config_file.append(PRE_PROCESS_JSON_FILE);
     }
     g_object_set (G_OBJECT(data->preprocess), "kernels-config", config_file.c_str(), NULL);
     GST_DEBUG ("Config file path is %s", config_file.c_str());
@@ -301,7 +302,11 @@ set_pipeline_config (AppData *data) {
     GST_DEBUG ("Config file path is %s", config_file.c_str());
 
     config_file.erase (config_file.begin()+ strlen(config_path), config_file.end()-0);
-    config_file.append(CCA_ACC_JSON_FILE);
+    if (dp == 2 && !file_dump) {
+        config_file.append(CCA_ACC_STRIDE_JSON_FILE);
+    } else {
+        config_file.append(CCA_ACC_JSON_FILE);
+    }
     g_object_set (G_OBJECT(data->cca),    "kernels-config", config_file.c_str(), NULL);
     GST_DEBUG ("Config file path is %s", config_file.c_str());
 
