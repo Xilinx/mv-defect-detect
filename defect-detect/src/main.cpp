@@ -39,7 +39,7 @@ GST_DEBUG_CATEGORY (defectdetect_app);
 #define MAX_WIDTH                    1920
 #define MAX_HEIGHT                   1080
 #define MAX_FRAME_RATE_DENOM         1
-#define MAX_DEMO_MODE_FRAME_RATE     4
+#define MAX_DEMO_MODE_FRAME_RATE     2
 
 typedef enum {
     DD_SUCCESS,
