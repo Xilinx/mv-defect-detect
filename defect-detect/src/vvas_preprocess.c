@@ -21,6 +21,7 @@
 #define DEFAULT_MAX_VALUE	255
 #define DEFAULT_STRIDE_VALUE	1920
 #define NORMALIZE_THRESHOLD 13
+#define MAX_HEIGHT 1080
 
 typedef struct _kern_priv
 {
@@ -28,7 +29,7 @@ typedef struct _kern_priv
     int max_value;
     int stride_value;
     int log_level;
-    VVASFrame *mem;
+    VVASFrame *mem, *tmp;
 } PreProcessingKernelPriv;
 
 int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NUM_OBJECT], VVASFrame *output[MAX_NUM_OBJECT]);
@@ -42,6 +43,8 @@ uint32_t xlnx_kernel_deinit(VVASKernel *handle)
     kernel_priv = (PreProcessingKernelPriv *)handle->kernel_priv;
     if (kernel_priv->mem)
         vvas_free_buffer (handle, kernel_priv->mem);
+    if (kernel_priv->tmp)
+        vvas_free_buffer (handle, kernel_priv->tmp);
     if (kernel_priv)
         free(kernel_priv);
     return 0;
@@ -52,6 +55,7 @@ int32_t xlnx_kernel_init(VVASKernel *handle)
     json_t *jconfig = handle->kernel_config;
     json_t *val; /* kernel config from app */
     PreProcessingKernelPriv *kernel_priv;
+    uint32_t resolution;
 
     kernel_priv = (PreProcessingKernelPriv *)calloc(1, sizeof(PreProcessingKernelPriv));
     if (!kernel_priv) {
@@ -81,6 +85,9 @@ int32_t xlnx_kernel_init(VVASKernel *handle)
 
     kernel_priv->mem = vvas_alloc_buffer (handle, 1*(sizeof(uint32_t)), VVAS_INTERNAL_MEMORY, DEFAULT_MEM_BANK, NULL);
 
+    resolution = kernel_priv->stride_value * MAX_HEIGHT;
+    kernel_priv->tmp = vvas_alloc_buffer (handle, resolution*(sizeof(uint8_t)), VVAS_INTERNAL_MEMORY, DEFAULT_MEM_BANK, NULL);
+
     handle->kernel_priv = (void *)kernel_priv;
     handle->is_multiprocess = 1;
 
@@ -95,6 +102,7 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
     VVASFrame *inframe  = input[0];
     VVASFrame *outframe = output[0];
     kernel_priv = (PreProcessingKernelPriv *)handle->kernel_priv;
+    uint64_t fwd;
 
     if (inframe->app_priv == NULL)
         LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "inframe app_priv is NULL");
@@ -118,10 +126,20 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
 
     kernel_priv->threshold = *thr - NORMALIZE_THRESHOLD;
 
-    LOG_MESSAGE (LOG_LEVEL_DEBUG, kernel_priv->log_level, "kernel start: img out %ld, fwd out %ld", output[0]->paddr[0], output[0]->paddr[1]);
+    /* Use temporary buffer if GRAY8 format is used, otherwise use second plane in case of NV16 */
+    if (output[0]->n_planes == 1) {
+        fwd = kernel_priv->tmp->paddr[0];
+    } else if (output[0]->n_planes == 2) {
+        fwd = output[0]->paddr[1];
+    } else {
+        LOG_MESSAGE(LOG_LEVEL_INFO, kernel_priv->log_level, "n_planes value %d not supported", output[0]->n_planes);
+        return FALSE;
+    }
+
+    LOG_MESSAGE (LOG_LEVEL_DEBUG, kernel_priv->log_level, "kernel start: img out %ld, fwd out %ld", output[0]->paddr[0], fwd);
 
     ret = vvas_kernel_start (handle, "ppppuuuuu", input[0]->paddr[0], output[0]->paddr[0], \
-                             output[0]->paddr[1], kernel_priv->mem->paddr[0], \
+                             fwd, kernel_priv->mem->paddr[0], \
                              kernel_priv->threshold, kernel_priv->max_value, input[0]->props.height, \
                              input[0]->props.width, kernel_priv->stride_value);
     if (ret < 0) {
