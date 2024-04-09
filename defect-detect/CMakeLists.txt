@@ -34,25 +34,25 @@ SET(INSTALL_PATH "opt/xilinx/xlnx-app-kr260-mv-defect-detect")
 add_library(vvas_cca SHARED src/vvas_cca.c)
 target_include_directories(vvas_cca PRIVATE ${GSTREAMER_INCLUDE_DIRS})
 target_link_libraries(vvas_cca
-  jansson vvasutil-2.0 gstvvasinfermeta-2.0)
+  jansson vvasutil-2.0 gstvvasusrmeta-2.0)
 install(TARGETS vvas_cca DESTINATION ${INSTALL_PATH}/lib)
 
 add_library(vvas_otsu SHARED src/vvas_otsu.c)
 target_include_directories(vvas_otsu PRIVATE ${GSTREAMER_INCLUDE_DIRS})
 target_link_libraries(vvas_otsu
-  jansson vvasutil-2.0 gstvvasinfermeta-2.0)
+  jansson vvasutil-2.0 gstvvasusrmeta-2.0)
 install(TARGETS vvas_otsu DESTINATION ${INSTALL_PATH}/lib)
 
 add_library(vvas_text2overlay SHARED src/vvas_text2overlay.cpp)
 target_include_directories(vvas_text2overlay PRIVATE ${GSTREAMER_INCLUDE_DIRS})
 target_link_libraries(vvas_text2overlay
-  gstreamer-1.0 glib-2.0 gstvvasinfermeta-2.0 jansson vvasutil-2.0 ${OpenCV_LIBS} glog)
+  gstreamer-1.0 glib-2.0 gstvvasusrmeta-2.0 jansson vvasutil-2.0 ${OpenCV_LIBS} glog)
 install(TARGETS vvas_text2overlay DESTINATION ${INSTALL_PATH}/lib)
 
 add_library(vvas_preprocess SHARED src/vvas_preprocess.c)
 target_include_directories(vvas_preprocess PRIVATE ${GSTREAMER_INCLUDE_DIRS})
 target_link_libraries(vvas_preprocess
-  jansson vvasutil-2.0 gstvvasinfermeta-2.0)
+  jansson vvasutil-2.0 gstvvasusrmeta-2.0)
 install(TARGETS vvas_preprocess DESTINATION ${INSTALL_PATH}/lib)
 
 add_executable(mv-defect-detect src/main.cpp)

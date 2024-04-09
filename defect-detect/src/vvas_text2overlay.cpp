@@ -17,7 +17,8 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <vvas/vvas_kernel.h>
-#include <gst/vvas/gstinferencemeta.h>
+#include <gst/vvas/gstvvasusrmeta.h>
+#include "vvas_dd_meta.h"
 
 int log_level;
 using namespace cv;
@@ -69,6 +70,7 @@ struct vvas_xoverlaypriv
   unsigned int y_offset;
   unsigned int x_offset;
   unsigned int total_defect;
+  int cnt;
   struct overlayframe_info frameinfo;
 };
 
@@ -164,25 +166,20 @@ extern "C"
 
     frameinfo->lumaImg.create (input[0]->props.height, input[0]->props.stride, CV_8U);
     frameinfo->lumaImg.data = (unsigned char *) lumaBuf;
-    GstInferenceMeta *infer_meta;
-    infer_meta = ((GstInferenceMeta *) gst_buffer_get_meta((GstBuffer *)frameinfo->inframe->app_priv,
-                                                                 gst_inference_meta_api_get_type()));
-    if (infer_meta == NULL) {
-        LOG_MESSAGE(LOG_LEVEL_INFO, "vvas meta data is not available for crop");
+
+    /* get meta from buffer */
+    GstVvasUsrMeta *meta = (GstVvasUsrMeta *) gst_buffer_get_vvas_usr_meta ((GstBuffer *) frameinfo->inframe->app_priv);
+    if (meta == NULL) {
+        LOG_MESSAGE (LOG_LEVEL_ERROR, "Meta data is not available");
         return FALSE;
     }
-    uint32_t *mango_pixel, *defect_pixel;
-    GstInferencePrediction *root = infer_meta->prediction;
-    /* Iterate through the immediate child predictions */
-    GSList *tmp = gst_inference_prediction_get_children(root);
+    dd_meta *dmeta = (dd_meta *) meta->usr_data;
+    uint32_t mango_pixel = dmeta->mango_pixels;
+    uint32_t defect_pixel = dmeta->defect_pixels;
 
-    for (GSList *child_predictions = tmp; child_predictions; child_predictions = g_slist_next(child_predictions)) {
-        GstInferencePrediction *child = (GstInferencePrediction *)child_predictions->data;
-        mango_pixel = (uint32_t *)child->reserved_1;
-        defect_pixel = (uint32_t *)child->reserved_2;
-    }
+    LOG_MESSAGE (LOG_LEVEL_DEBUG, "Frame Count %d: Mango Pixels %d, Defect Pixels %d", ++(kpriv->cnt), mango_pixel, defect_pixel);
 
-    double defect_density = ((double)*defect_pixel / *mango_pixel) * 100.0;
+    double defect_density = ((double) defect_pixel / mango_pixel) * 100.0;
     bool defect_decision = (defect_density > kpriv->defect_threshold);
 
     char text_buffer[512] = {0,};
@@ -215,7 +212,6 @@ extern "C"
         putText(frameinfo->lumaImg, text_buffer, cv::Point(kpriv->x_offset, y_point), kpriv->font,
                 kpriv->font_size, Scalar (255.0, 255.0, 255.0), 1, 1);
     }
-    g_slist_free(tmp);
 
     return 0;
   }

@@ -16,7 +16,8 @@
 
 #include <vvas/vvaslogs.h>
 #include <vvas/vvas_kernel.h>
-#include <gst/vvas/gstinferencemeta.h>
+#include <gst/vvas/gstvvasusrmeta.h>
+#include "vvas_dd_meta.h"
 
 #define DEFAULT_MAX_VALUE	255
 #define DEFAULT_STRIDE_VALUE	1920
@@ -29,6 +30,7 @@ typedef struct _kern_priv
     int max_value;
     int stride_value;
     int log_level;
+    int cnt;
     VVASFrame *mem, *tmp;
 } PreProcessingKernelPriv;
 
@@ -98,7 +100,6 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
 {
     PreProcessingKernelPriv *kernel_priv;
     int ret;
-    uint32_t *thr;
     VVASFrame *inframe  = input[0];
     VVASFrame *outframe = output[0];
     kernel_priv = (PreProcessingKernelPriv *)handle->kernel_priv;
@@ -107,24 +108,18 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
     if (inframe->app_priv == NULL)
         LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "inframe app_priv is NULL");
 
-    GstInferenceMeta *infer_meta = ((GstInferenceMeta *)gst_buffer_get_meta((GstBuffer *)
-                                                                inframe->app_priv,
-                                                                gst_inference_meta_api_get_type()));
-    if (infer_meta == NULL)
-    {
-        LOG_MESSAGE(LOG_LEVEL_INFO, kernel_priv->log_level, "vvas meta data is not available");
+    /* read meta from buffer */
+    GstVvasUsrMeta *meta = (GstVvasUsrMeta *) gst_buffer_get_vvas_usr_meta ((GstBuffer *) inframe->app_priv);
+    if (meta == NULL) {
+        LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "Meta data is not available");
         return FALSE;
     }
-    GstInferencePrediction *root = infer_meta->prediction;
-    /* Iterate through the immediate child predictions */
-    GSList *tmp = gst_inference_prediction_get_children(root);
-    for (GSList *child_predictions = tmp; child_predictions; child_predictions = g_slist_next(child_predictions))
-    {
-        GstInferencePrediction *child = (GstInferencePrediction *)child_predictions->data;
-        thr = (uint32_t *)child->reserved_1;
-    }
+    dd_meta *dmeta = (dd_meta *) meta->usr_data;
 
-    kernel_priv->threshold = *thr - NORMALIZE_THRESHOLD;
+    LOG_MESSAGE(LOG_LEVEL_INFO, kernel_priv->log_level, "Frame count %d: Otsu Threshold %d", ++(kernel_priv->cnt), dmeta->threshold);
+
+    /* prepare kernel args */
+    kernel_priv->threshold = dmeta->threshold - NORMALIZE_THRESHOLD;
 
     /* Use temporary buffer if GRAY8 format is used, otherwise use second plane in case of NV16 */
     if (output[0]->n_planes == 1) {
@@ -136,6 +131,7 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
         return FALSE;
     }
 
+    /* start kernel */
     LOG_MESSAGE (LOG_LEVEL_DEBUG, kernel_priv->log_level, "kernel start: img out %ld, fwd out %ld", output[0]->paddr[0], fwd);
 
     ret = vvas_kernel_start (handle, "ppppuuuuu", input[0]->paddr[0], output[0]->paddr[0], \
@@ -156,40 +152,23 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
 
     LOG_MESSAGE (LOG_LEVEL_DEBUG, kernel_priv->log_level, "kernel done");
 
-    g_slist_free(tmp);
+    /* retrieve meta from kernel */
+    uint32_t *mango_pix = kernel_priv->mem->vaddr[0];
+    dmeta = (dd_meta *) calloc(1, sizeof(dd_meta *));
+    dmeta->mango_pixels = *mango_pix;
 
-    /* Added below code to append meta data */
-    uint32_t *mango_pix;
-    mango_pix =  kernel_priv->mem->vaddr[0];
+    LOG_MESSAGE(LOG_LEVEL_INFO, kernel_priv->log_level, "Frame count %d: Mango Pixels %d", kernel_priv->cnt, *mango_pix);
 
     if (outframe->app_priv == NULL)
         LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "outframe app_priv is NULL");
 
-    infer_meta = (GstInferenceMeta *) gst_buffer_add_meta ((GstBuffer *)outframe->app_priv,
-                                                     gst_inference_meta_get_info (), NULL);
-    if (infer_meta == NULL) {
+    /* write meta to buffer */
+    meta = (GstVvasUsrMeta *) gst_buffer_add_vvas_usr_meta ((GstBuffer *) outframe->app_priv, dd_meta_copy, dd_meta_release, (void *) dmeta);
+    if (meta == NULL) {
         LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "Meta data is not available");
         return FALSE;
     }
 
-    if (NULL == infer_meta->prediction) {
-        LOG_MESSAGE (LOG_LEVEL_INFO, kernel_priv->log_level, "Allocating prediction");
-        infer_meta->prediction = gst_inference_prediction_new ();
-    } else {
-        LOG_MESSAGE (LOG_LEVEL_INFO, kernel_priv->log_level, "Already allocated prediction");
-    }
-
-    GstInferencePrediction *predict;
-    GstInferenceClassification *a = NULL;
-    predict = gst_inference_prediction_new ();
-
-    a = gst_inference_classification_new_full (-1, 0.0, "FORWARD PASS IMAGE", 0, NULL, NULL, NULL);
-    predict->reserved_1 = (void *)mango_pix;
-    gst_inference_prediction_append_classification (predict, a);
-
-    gst_inference_prediction_append (infer_meta->prediction, predict);
-
-    /* End of the code to append the meta data */
     return TRUE;
 }
 

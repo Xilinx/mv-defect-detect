@@ -16,7 +16,8 @@
 
 #include <vvas/vvaslogs.h>
 #include <vvas/vvas_kernel.h>
-#include <gst/vvas/gstinferencemeta.h>
+#include <gst/vvas/gstvvasusrmeta.h>
+#include "vvas_dd_meta.h"
 
 struct bgr2y8_params {
     int32_t black_Vmax;
@@ -36,6 +37,7 @@ struct bgr2y8_params {
 typedef struct _kern_priv
 {
     int log_level;
+    int cnt;
     VVASFrame *otsuval;
     VVASFrame *array_params;
 } OtsuKernelPriv;
@@ -104,18 +106,15 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
     int ret;
     uint32_t *thr;
     float sigma = 0.0;
-    GstInferenceMeta *infer_meta = NULL;
+    GstVvasUsrMeta *meta = NULL;
+    dd_meta *dmeta = NULL;
     VVASFrame *outframe = output[0];
     kernel_priv = (OtsuKernelPriv *)handle->kernel_priv;
+
+    /* start kernel */
     ret = vvas_kernel_start (handle, "ppuufpp", input[0]->paddr[0], \
                              output[0]->paddr[0], input[0]->props.height, input[0]->props.width, sigma, \
                              kernel_priv->otsuval->paddr[0], kernel_priv->array_params->paddr[0]);
-#if 0
-    ret = vvas_kernel_start (handle, "ppuufpu", input[0]->paddr[0], \
-                             output[0]->paddr[0], input[0]->props.height, input[0]->props.width, \
-                             sigma, kernel_priv->otsuval->paddr[0], input[0]->props.stride);
-#endif
-
     if (ret < 0) {
         LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "Failed to issue execute command");
         return FALSE;
@@ -127,30 +126,20 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
         LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "Failed to receive response from kernel");
         return FALSE;
     }
+
+    /* retrieve dd_meta from kernel */
     thr =  kernel_priv->otsuval->vaddr[0];
-    infer_meta = (GstInferenceMeta *) gst_buffer_add_meta ((GstBuffer *)outframe->app_priv,
-                                                     gst_inference_meta_get_info (), NULL);
-    if (infer_meta == NULL) {
+    dmeta = (dd_meta *) calloc(1, sizeof(dd_meta *));
+    dmeta->threshold = *thr;
+
+    LOG_MESSAGE (LOG_LEVEL_INFO, kernel_priv->log_level, "Frame count %d: Otsu threshold %d", ++(kernel_priv->cnt) , *thr);
+
+    /* add meta to buffer */
+    meta = (GstVvasUsrMeta *) gst_buffer_add_vvas_usr_meta ((GstBuffer *) outframe->app_priv, dd_meta_copy, dd_meta_release, (void *) dmeta);
+    if (meta == NULL) {
         LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "Meta data is not available");
         return FALSE;
     }
-
-    if (NULL == infer_meta->prediction) {
-        LOG_MESSAGE (LOG_LEVEL_INFO, kernel_priv->log_level, "Allocating prediction");
-        infer_meta->prediction = gst_inference_prediction_new ();
-    } else {
-        LOG_MESSAGE (LOG_LEVEL_INFO, kernel_priv->log_level, "Already allocated prediction");
-    }
-
-    GstInferencePrediction *predict;
-    GstInferenceClassification *a = NULL;
-    predict = gst_inference_prediction_new ();
-
-    a = gst_inference_classification_new_full (-1, 0.0, "OTSU THRSHOLD", 0, NULL, NULL, NULL);
-    predict->reserved_1 = (void *)thr;
-    gst_inference_prediction_append_classification (predict, a);
-
-    gst_inference_prediction_append (infer_meta->prediction, predict);
 
     return TRUE;
 }

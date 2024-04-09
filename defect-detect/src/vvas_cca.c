@@ -16,7 +16,8 @@
 
 #include <vvas/vvaslogs.h>
 #include <vvas/vvas_kernel.h>
-#include <gst/vvas/gstinferencemeta.h>
+#include <gst/vvas/gstvvasusrmeta.h>
+#include "vvas_dd_meta.h"
 
 #define DEFAULT_STRIDE_VALUE        1920
 #define MAX_SUPPORTED_WIDTH         1920
@@ -26,6 +27,7 @@ typedef struct _kern_priv
 {
     int log_level;
     int stride_value;
+    int cnt;
     VVASFrame *mem;
     VVASFrame *mango_pix;
     VVASFrame *defect_pix;
@@ -90,40 +92,29 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
     int ret;
     VVASFrame *outframe = output[0];
     VVASFrame *inframe = input[0];
-
     kernel_priv = (KernelPriv *)handle->kernel_priv;
 
     if (inframe->app_priv == NULL)
         LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "inframe app_priv is NULL");
 
-    GstInferenceMeta *infer_meta;
-    infer_meta = ((GstInferenceMeta *) gst_buffer_get_meta((GstBuffer *)inframe->app_priv,
-                                                                 gst_inference_meta_api_get_type()));
-    if (infer_meta == NULL) {
-        LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "vvas meta data is not available");
+    /* read meta from buffer */
+    GstVvasUsrMeta *meta = (GstVvasUsrMeta *) gst_buffer_get_vvas_usr_meta ((GstBuffer *) inframe->app_priv);
+    if (meta == NULL) {
+        LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "Meta data is not available");
         return FALSE;
     }
-    uint32_t *mango_pixel, *defect_pixel;
-    GstInferencePrediction *root = infer_meta->prediction;
-    /* Iterate through the immediate child predictions */
-    GSList *tmp = gst_inference_prediction_get_children(root);
+    dd_meta *dmeta = (dd_meta *) meta->usr_data;
+    uint32_t mango_pixel = dmeta->mango_pixels;
 
-    for (GSList *child_predictions = tmp; child_predictions; child_predictions = g_slist_next(child_predictions)) {
-        GstInferencePrediction *child = (GstInferencePrediction *)child_predictions->data;
-        mango_pixel = (uint32_t *)child->reserved_1;
-    }
+    LOG_MESSAGE (LOG_LEVEL_DEBUG, kernel_priv->log_level, "Frame Count %d: Mango Pixels %d", ++(kernel_priv->cnt), mango_pixel);
 
+    /* start kernel */
     LOG_MESSAGE (LOG_LEVEL_DEBUG, kernel_priv->log_level, "kernel start: img in %ld, fwd in %ld", input[0]->paddr[0], input[0]->paddr[1]);
 
     ret = vvas_kernel_start (handle, "ppppuuu", input[0]->paddr[0], input[0]->paddr[1], \
                              output[0]->paddr[0], kernel_priv->mem->paddr[0], \
                              input[0]->props.height, output[0]->props.width, \
                              kernel_priv->stride_value);
-#if 0
-    ret = vvas_kernel_start (handle, "puppuu", input[0]->paddr[0], frwd_pass, \
-                             output[0]->paddr[0], kernel_priv->mem->paddr[0], \
-                             input[0]->props.height, input[0]->props.width, input[0]->props.stride);
-#endif
     if (ret < 0) {
         LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "Failed to issue execute command");
         return FALSE;
@@ -137,35 +128,25 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
         LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "Failed to receive response from kernel");
         return FALSE;
     }
-    g_slist_free(tmp);
-    defect_pixel =  kernel_priv->mem->vaddr[0];
+
+    /* retrieve meta from kernel */
+    uint32_t *defect_pixel = kernel_priv->mem->vaddr[0];
+    dmeta = (dd_meta *) calloc(1, sizeof(dd_meta *));
+    dmeta->defect_pixels = *defect_pixel;
+    dmeta->mango_pixels = mango_pixel;
+
+    LOG_MESSAGE (LOG_LEVEL_DEBUG, kernel_priv->log_level, "Frame Count %d: Defect Pixels %d", kernel_priv->cnt, *defect_pixel);
 
     if (outframe->app_priv == NULL)
         LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "outframe app_priv is NULL");
 
-    infer_meta = (GstInferenceMeta *) gst_buffer_add_meta ((GstBuffer *) outframe->app_priv,
-                                                      gst_inference_meta_get_info (), NULL);
-    if (infer_meta == NULL) {
-        LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "vvas meta data is not available");
+    /* write meta to buffer */
+    meta = (GstVvasUsrMeta *) gst_buffer_add_vvas_usr_meta ((GstBuffer *) outframe->app_priv, dd_meta_copy, dd_meta_release, (void *) dmeta);
+    if (meta == NULL) {
+        LOG_MESSAGE (LOG_LEVEL_ERROR, kernel_priv->log_level, "Meta data is not available");
         return FALSE;
     }
-    if (NULL == infer_meta->prediction) {
-        LOG_MESSAGE (LOG_LEVEL_INFO, kernel_priv->log_level, "Allocating prediction");
-        infer_meta->prediction = gst_inference_prediction_new ();
-    } else {
-        LOG_MESSAGE (LOG_LEVEL_INFO, kernel_priv->log_level, "Already allocated prediction");
-    }
 
-    GstInferencePrediction *predict;
-    GstInferenceClassification *a = NULL;
-    predict = gst_inference_prediction_new ();
-
-    a = gst_inference_classification_new_full (-1, 0.0, "DEFECT DENSITY", 0, NULL, NULL, NULL);
-    predict->reserved_1 = (void *) mango_pixel;
-    predict->reserved_2 = (void *) defect_pixel;
-    gst_inference_prediction_append_classification (predict, a);
-
-    gst_inference_prediction_append (infer_meta->prediction, predict);
     return TRUE;
 }
 
