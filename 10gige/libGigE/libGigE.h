@@ -65,7 +65,7 @@ typedef u32 ( *USER_GET_CALLBACK_FUNC )(u8 device, u32 address, u16 *status);
 typedef void ( *USER_SET_CALLBACK_FUNC )(u8 device, u32 address, u32 value, u16 *status);
 
 // generic libgige user callback
-typedef u32 ( *GIGE_EVENT_CALLBACK_FUNC )(u8 device, u32 id, u32 param, void *data);
+typedef u32 ( *GIGE_EVENT_CALLBACK_FUNC )(u8 device, u32 id, u32 param, void *data, u32 stream_format);
 
 // network config callback functions
 typedef int ( *LOCAL_NET_CONFIG_CALLBACK_FUNC )(u8 device, u32 ip, u32 netmask, u32 gateway);

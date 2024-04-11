@@ -60,9 +60,9 @@ extern u32 video_gendc_mode;
 
 u32 get_user_reg(u8 device, u32 address, u16 *status);
 void set_user_reg(u8 device, u32 address, u32 value, u16 *status);
-void user_init(u8 device);
+void user_init(u8 device, u32 stream_format);
 void user_callback(u8 device);
 
-u32 gige_event(u8 device, u32 id, u32 param, void *data);
+u32 gige_event(u8 device, u32 id, u32 param, void *data, u32 stream_format);
 
 #endif
