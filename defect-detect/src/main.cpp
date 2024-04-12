@@ -60,7 +60,7 @@ typedef struct _AppData {
     GstElement *queue, *q_raw,*q_raw_1;
     GstElement *perf, *videorate;
     GstElement *preprocess, *otsu, *cca, *text2overlay;
-    GstElement *capsfilter_vr, *capsfilter_op;
+    GstElement *capsfilter_vr, *capsfilter_op, *capsfilter_cca;
 } AppData;
 
 GMainLoop *loop;
@@ -268,6 +268,8 @@ set_pipeline_config (AppData *data) {
             }
         }
     }
+
+    /* Source caps */
     caps  = gst_caps_new_simple ("video/x-raw",
                                  "width",     G_TYPE_INT,        width,
                                  "height",    G_TYPE_INT,        height,
@@ -278,16 +280,34 @@ set_pipeline_config (AppData *data) {
     g_object_set (G_OBJECT (data->capsfilter),  "caps",  caps, NULL);
     gst_caps_unref (caps);
 
+    /*
+     * Defect detect caps (between preprocess and cca)
+     *
+     * Not using real NV16 format here but instead a double-size,
+     * semi-planar buffer where plane0 holds the threshold output
+     * frame and plane1 holds the forward pass output frame of the
+     * preprocessing element. Both frames as passed in a single buffer
+     * to the cca element.
+     */
+    caps  = gst_caps_new_simple ("video/x-raw",
+                                 "width",     G_TYPE_INT,        width,
+                                 "height",    G_TYPE_INT,        height,
+                                 "format",    G_TYPE_STRING,     "NV16",
+                                 NULL);
+    GST_DEBUG ("new Caps for cca capsfilter %" GST_PTR_FORMAT, caps);
+    g_object_set (G_OBJECT (data->capsfilter_cca),  "caps",  caps, NULL);
+    gst_caps_unref (caps);
 
+    /* Output caps */
     caps  = gst_caps_new_simple ("video/x-raw",
                                  "width",     G_TYPE_INT,        width,
                                  "height",    G_TYPE_INT,        height,
                                  "format",    G_TYPE_STRING,     (dp == 0 ? caps_fmt : "GRAY8"),
                                  NULL);
     GST_DEBUG ("new Caps for output capsfilter_op %" GST_PTR_FORMAT, caps);
-
     g_object_set (G_OBJECT (data->capsfilter_op),  "caps",  caps, NULL);
     gst_caps_unref (caps);
+
     if (dp == 1 && !file_dump) {
         config_file.append(PRE_PROCESS_STRIDE_JSON_FILE);
     } else {
@@ -344,7 +364,7 @@ link_pipeline (AppData *data) {
             }
             GST_DEBUG ("Linking for src --> capsfilter --> otsu --> queue --> preprocess --> perf --> sink successfully");
         } else if (dp ==2) {
-            if (!gst_element_link_many(data->src, data->capsfilter, data->otsu, data->queue, data->preprocess, data->q_raw, data->cca, \
+            if (!gst_element_link_many(data->src, data->capsfilter, data->otsu, data->queue, data->preprocess, data->q_raw, data->capsfilter_cca, data->cca, \
                                         /*data->q_raw,*/ data->text2overlay, data->q_raw_1,data->capsfilter_op, data->perf, data->sink, NULL)) {
                 GST_ERROR ("Error linking for src --> caps --> otsu --> q --> preprocess --> q --> cca --> text2overlay --> perf --> sink");
                 return DD_ERROR_PIPELINE_LINKING_FAIL;
@@ -366,7 +386,7 @@ link_pipeline (AppData *data) {
             }
             GST_DEBUG ("Linking for src --> caps --> otsu --> preprocess --> rate --> caps --> perf --> sink successfully");
         } else if (dp ==2) {
-            if (!gst_element_link_many(data->src, data->capsfilter, data->otsu,data->queue, data->preprocess,data->q_raw, data->cca, data->text2overlay, \
+            if (!gst_element_link_many(data->src, data->capsfilter, data->otsu,data->queue, data->preprocess,data->q_raw, data->capsfilter_cca, data->cca, data->text2overlay, \
                                        data->q_raw_1, data->videorate, data->capsfilter_vr, data->capsfilter_op, data->perf, data->sink, NULL)) {
                 GST_ERROR ("Error linking for src --> caps --> otsu --> pp --> cca --> text2overlay --> rate --> caps --> perf --> sink");
                 return DD_ERROR_PIPELINE_LINKING_FAIL;
@@ -389,7 +409,7 @@ link_pipeline (AppData *data) {
             GST_DEBUG ("Linking for src --> caps --> otsu --> queue --> preprocess --> perf --> sink successfully");
         } else if (dp ==2) {
             if (!gst_element_link_many(data->src, data->queue, data->capsfilter, data->otsu/*, data->queue*/, data->preprocess, data->q_raw, \
-                                       data->cca, data->text2overlay, data->q_raw_1, data->capsfilter_op, data->perf, data->sink, NULL)) {
+                                       data->capsfilter_cca, data->cca, data->text2overlay, data->q_raw_1, data->capsfilter_op, data->perf, data->sink, NULL)) {
                 GST_ERROR ("Error linking for src --> caps --> otsu --> q --> pp --> q --> cca --> text2overlay --> perf --> sink");
                 return DD_ERROR_PIPELINE_LINKING_FAIL;
             }
@@ -410,7 +430,7 @@ link_pipeline (AppData *data) {
             }
             GST_DEBUG ("Linking for src --> vparse --> otsu --> preprocess --> perf --> sink successfully");
         } else if (dp ==2) {
-            if (!gst_element_link_many(data->src, data->rawvparse, data->otsu, data->queue, data->preprocess,data->q_raw, data->cca, data->text2overlay, \
+            if (!gst_element_link_many(data->src, data->rawvparse, data->otsu, data->queue, data->preprocess,data->q_raw, data->capsfilter_cca, data->cca, data->text2overlay, \
                                        data->q_raw_1, data->capsfilter_op, data->perf, data->sink, NULL)) {
                 GST_ERROR ("Error linking for src --> vparse --> otsu --> preprocess --> cca --> text2overlay --> perf --> sink");
                 return DD_ERROR_PIPELINE_LINKING_FAIL;
@@ -454,6 +474,7 @@ create_pipeline (AppData *data) {
     }
     data->capsfilter      =  gst_element_factory_make("capsfilter",    NULL);
     data->capsfilter_vr   =  gst_element_factory_make("capsfilter",    NULL);
+    data->capsfilter_cca  =  gst_element_factory_make("capsfilter",    NULL);
     data->capsfilter_op   =  gst_element_factory_make("capsfilter",    NULL);
     data->rawvparse       =  gst_element_factory_make("rawvideoparse", NULL);
     data->preprocess      =  gst_element_factory_make("vvas_xfilter",  "pre-process");
@@ -468,11 +489,9 @@ create_pipeline (AppData *data) {
 
     if (!data->pipeline || !data->src || !data->rawvparse \
         || !data->preprocess || !data->otsu || !data->cca || !data->text2overlay \
-        || !data->sink \
-        || !data->queue \
-        || !data->q_raw \
-        || !data->q_raw_1 \
-        || !data->perf || !data->videorate || !data->capsfilter || !data->capsfilter_vr || !data->capsfilter_op) {
+        || !data->sink || !data->queue || !data->q_raw || !data->q_raw_1 || !data->perf \
+        || !data->videorate || !data->capsfilter || !data->capsfilter_vr || !data->capsfilter_op \
+        || !data->capsfilter_cca) {
            GST_ERROR ("could not create few elements");
            return DD_ERROR_PIPELINE_CREATE_FAIL;
     }
@@ -480,9 +499,9 @@ create_pipeline (AppData *data) {
     GST_DEBUG ("All elements are created");
     gst_bin_add_many(GST_BIN(data->pipeline), data->src, data->rawvparse, \
                      data->preprocess, data->otsu, data->cca, data->text2overlay, \
-                     data->sink, data->q_raw, data->q_raw_1,\
-                     data->perf, data->videorate, \
-                     data->capsfilter, data->capsfilter_vr, data->capsfilter_op, data->queue, NULL);
+                     data->sink, data->q_raw, data->q_raw_1, data->perf, data->videorate, \
+                     data->capsfilter, data->capsfilter_vr, data->capsfilter_op, data->queue, \
+                     data->capsfilter_cca, NULL);
     return DD_SUCCESS;
 }
 
