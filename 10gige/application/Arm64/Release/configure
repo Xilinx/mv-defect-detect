@@ -5,14 +5,16 @@ function print_help() {
   echo -e "  $0 [options]"
   echo -e ""
   echo -e "Options:"
-  echo -e "  -h, --help         : Display this help and exit"
-  echo -e "  -m, --media-device : Media device node (default: /dev/media0)"
-  echo -e "  -f, --format <fmt> : Valid values for <fmt>: color or mono"
+  echo -e "  -h, --help             : Display this help and exit"
+  echo -e "  -m, --media-device     : Media device node (default: /dev/media0)"
+  echo -e "  -f, --format <fmt>     : Valid values for <fmt>: color or mono"
+  echo -e "  -r, --framerate <rate> : Valid values for <rate> : 60 or 120"
 }
 
-# Set default mode to mono
+# Set default mode to mono at 60fps
 fmt="mono"
 media="/dev/media0"
+fps="60"
 
 while [ "$1" != "" ]; do
   case $1 in
@@ -27,6 +29,10 @@ while [ "$1" != "" ]; do
   -f | --format )
     shift
     fmt=$1
+    ;;
+  -r | --framerate )
+    shift
+    fps=$1
     ;;
   * )
     echo -e "invalid argument '$1'\n"
@@ -59,12 +65,22 @@ else
   exit 1
 fi
 
+# set framerate
+if [ "${fps}" = "60" ]; then
+  echo "Configure framerate as ${fps}fps for imx547 sensor"
+elif [ "${fps}" = "120" ]; then
+  echo "Configure framerate as ${fps}fps for imx547 sensor"
+else
+  echo "Invalid framerate ${fps}. Supported rates are: 60 or 120"
+  exit 1
+fi
+
 # Configure the sensor subdev node
 # Even though we are requesting 1920x1080, the sensor driver hard-codes the
 # resolution to 2472x2128. There is a crop and a fixed resize IP in the capture
 # pipeline that crops 64 pixel lines of optical black and down-sizes the image
 # to 1920x1080.
-media-ctl -d ${media} -V "\"imx547 7-001a\":0 [fmt:${fmt1}/2472x2064 field:none @1/60]"
+media-ctl -d ${media} -V "\"imx547 7-001a\":0 [fmt:${fmt1}/2472x2064 field:none @1/${fps}]"
 media-ctl -d ${media} -V "\"axi:isp_subset_convertor_0\":0 [${fmt1}/2472x2064 field:none]"
 media-ctl -d ${media} -V "\"axi:isp_subset_convertor_0\":1 [${fmt2}/2472x2064 field:none]"
 media-ctl -d ${media} -V "\"b0000000.ISPPipeline_accel\":0 [${fmt2}/2472x2064 field:none]"
