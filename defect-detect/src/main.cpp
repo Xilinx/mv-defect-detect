@@ -470,6 +470,9 @@ create_pipeline (AppData *data) {
             data->sink     =  gst_element_factory_make("kmssink",       "display-preprocess");
         } else if (dp == 2) {
             data->sink     =  gst_element_factory_make("kmssink",       "display-final");
+            if (!file_playback) {
+                g_object_set(G_OBJECT(data->sink), "sync", FALSE, NULL);
+            }
         }
     }
     data->capsfilter      =  gst_element_factory_make("capsfilter",    NULL);
