@@ -33,12 +33,13 @@ GST_DEBUG_CATEGORY (defectdetect_app);
 #define PRE_PROCESS_STRIDE_JSON_FILE "preprocess-accelarator-stride.json"
 #define OTSU_ACC_JSON_FILE           "otsu-accelarator.json"
 #define CCA_ACC_JSON_FILE            "cca-accelarator.json"
+#define CCA_ACC_STRIDE_JSON_FILE     "cca-accelarator-stride.json"
 #define TEXT_2_OVERLAY_JSON_FILE     "text2overlay.json"
 #define DRM_BUS_ID                   "fd4a0000.display"
 #define MAX_WIDTH                    1920
 #define MAX_HEIGHT                   1080
 #define MAX_FRAME_RATE_DENOM         1
-#define MAX_DEMO_MODE_FRAME_RATE     4
+#define MAX_DEMO_MODE_FRAME_RATE     2
 
 typedef enum {
     DD_SUCCESS,
@@ -74,7 +75,6 @@ static gchar *msg_firmware = (gchar *)"Load the HW accelerator firmware first. U
 static gchar* out_file = NULL;
 guint width =  1920;
 guint height = 1080;
-guint stride_align = 256;
 guint dp = 0;
 guint framerate = 60;
 gint block_size;
@@ -282,17 +282,16 @@ set_pipeline_config (AppData *data) {
     caps  = gst_caps_new_simple ("video/x-raw",
                                  "width",     G_TYPE_INT,        width,
                                  "height",    G_TYPE_INT,        height,
-                                 "stride-align",    G_TYPE_INT,  stride_align,
                                  "format",    G_TYPE_STRING,     (dp == 0 ? caps_fmt : "GRAY8"),
                                  NULL);
     GST_DEBUG ("new Caps for output capsfilter_op %" GST_PTR_FORMAT, caps);
 
     g_object_set (G_OBJECT (data->capsfilter_op),  "caps",  caps, NULL);
     gst_caps_unref (caps);
-    if (file_dump){
-    config_file.append(PRE_PROCESS_JSON_FILE);
-    }else{
-    config_file.append(PRE_PROCESS_STRIDE_JSON_FILE);
+    if (dp == 1 && !file_dump) {
+        config_file.append(PRE_PROCESS_STRIDE_JSON_FILE);
+    } else {
+        config_file.append(PRE_PROCESS_JSON_FILE);
     }
     g_object_set (G_OBJECT(data->preprocess), "kernels-config", config_file.c_str(), NULL);
     GST_DEBUG ("Config file path is %s", config_file.c_str());
@@ -303,7 +302,11 @@ set_pipeline_config (AppData *data) {
     GST_DEBUG ("Config file path is %s", config_file.c_str());
 
     config_file.erase (config_file.begin()+ strlen(config_path), config_file.end()-0);
-    config_file.append(CCA_ACC_JSON_FILE);
+    if (dp == 2 && !file_dump) {
+        config_file.append(CCA_ACC_STRIDE_JSON_FILE);
+    } else {
+        config_file.append(CCA_ACC_JSON_FILE);
+    }
     g_object_set (G_OBJECT(data->cca),    "kernels-config", config_file.c_str(), NULL);
     GST_DEBUG ("Config file path is %s", config_file.c_str());
 

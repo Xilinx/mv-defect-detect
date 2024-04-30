@@ -54,15 +54,12 @@ int32_t xlnx_kernel_init(VVASKernel *handle)
     json_t *jconfig = handle->kernel_config;
     json_t *val; /* kernel config from app */
     PreProcessingKernelPriv *kernel_priv;
+    uint32_t resolution;
 
     kernel_priv = (PreProcessingKernelPriv *)calloc(1, sizeof(PreProcessingKernelPriv));
     if (!kernel_priv) {
         printf("Error: Unable to allocate PPE kernel memory\n");
     }
-    uint32_t resolution = 1920 * 1080;
-
-    kernel_priv->tmp_mem   = vvas_alloc_buffer (handle, resolution*(sizeof(uint8_t)), VVAS_INTERNAL_MEMORY, DEFAULT_MEM_BANK, NULL);
-    kernel_priv->mem = vvas_alloc_buffer (handle, 1*(sizeof(uint32_t)), VVAS_INTERNAL_MEMORY, DEFAULT_MEM_BANK, NULL);
 
     /* parse config */
     val = json_object_get (jconfig, "debug_level");
@@ -84,8 +81,15 @@ int32_t xlnx_kernel_init(VVASKernel *handle)
     else
 	    kernel_priv->stride_value = json_integer_value (val);
     LOG_MESSAGE (LOG_LEVEL_INFO, kernel_priv->log_level, "VVAS PPE: stride_value %d", kernel_priv->stride_value);
+
+    resolution = kernel_priv->stride_value * 1080;
+
+    kernel_priv->tmp_mem   = vvas_alloc_buffer (handle, resolution*(sizeof(uint8_t)), VVAS_INTERNAL_MEMORY, DEFAULT_MEM_BANK, NULL);
+    kernel_priv->mem = vvas_alloc_buffer (handle, 1*(sizeof(uint32_t)), VVAS_INTERNAL_MEMORY, DEFAULT_MEM_BANK, NULL);
+
     handle->kernel_priv = (void *)kernel_priv;
     handle->is_multiprocess = 1;
+
     return 0;
 }
 
