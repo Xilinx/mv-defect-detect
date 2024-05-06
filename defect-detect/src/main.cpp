@@ -629,8 +629,6 @@ main (int argc, char **argv) {
     if (access("/dev/dri/by-path/platform-fd4a0000.display-card", F_OK) != 0) {
         g_printerr("ERROR: Display device is not ready.\n%s", msg_firmware);
         return -1;
-    } else {
-        exec("echo | modetest -M xlnx -D fd4a0000.display -s 43@41:1920x1080-60@BG24 -w 40:\"alpha\":255");
     }
 
     if (!file_playback && (check_capture_src() != 0)) {
