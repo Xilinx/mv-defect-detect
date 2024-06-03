@@ -283,9 +283,10 @@ To run the application, follow the steps mentioned below:
 1. Run the configure script to configure the media nodes and the IPs in the capture path.
 
     ```bash
-      configure -f mono         //For Monochrome Sensor
-      configure -f color        //For Color Sensor
+      configure -f mono -r 60         //For Monochrome Sensor at 60fps
+      configure -f color -r 60        //For Color Sensor at 60fps
     ```
+    ***NOTE**: Valid values for `-r` are 60 and 120. If user does not specify the rate, default value is set to 60 fps.
 
 2. Set Static IP address on the SFP eth interface on the KR260. It should be under same subnet as Host Machines SFP IP
 
@@ -375,10 +376,10 @@ To run the application, follow the steps mentioned below:
 6. Run the following command to run the gvrd application.
 
       ```bash
-      gvrd \<10gige port detail\>
+      gvrd <10gige port detail> <mono|color>
       ```
 
-    For example, `gvrd eth2`.
+    For example, `gvrd eth2 mono`, `gvrd eth2 color`.
 
     > ***Note***: Once done with the 10GigE application, to switch to another accelerator application, unload the currently loaded accelerator application firmware by running:
     >
@@ -454,6 +455,18 @@ To run the application, follow the steps mentioned below:
       ![120fps_mono](./media/120fps_Mono.JPG)
 
   **NOTE**: You will record ~40-50 fps for a 60 fps pipeline and ~90-100 fps for a 120 fps pipeline.
+
+  * For 60 fps on a Color Sensor
+
+      ![60fps_color](./media/60fps_color.JPG)
+  
+  * For 120 fps on a Color Sensor
+
+      ![120fps_color](./media/120fps_color.JPG)
+
+  **NOTE**: You will record ~25-35 fps for a 60 fps pipeline and ~75-95 fps for a 120 fps pipeline. Since we are transmitting Raw
+            Bayer Format from Kria to X86 Host, that needs to be debayered by X86 Host and converted to RGB for displaying which
+            consumes additional compute time, hence the fps drop.
 
 ## Running the MV-Defect-Detect Application
 
