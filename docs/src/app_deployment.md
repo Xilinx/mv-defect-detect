@@ -28,52 +28,38 @@ This document shows how to set up the board and run the **MV-Defect Detect** and
 
 5. 16GB MicroSD Cards (Included with KR260 Robotics Starter Kit)
 
-6. 2-Windows or Ubuntu PC, one for capture the UART/console logs from KR260 board, and one to act as host PC
+6. 1080p Monitor and Power Supply
 
-      a.  Windows-10 or latest
+7. Display Port Cable
 
-      b. Ubuntu-16.04 or latest
+8. 1-Windows PC, for capturing the UART/console logs from KR260 board, and to act as host PC
 
-7. Fiber Optic cable
+9. [Fiber Optic Cable](https://www.amazon.com/dp/B089K3VYZ1)
 
-8. [Sony IMX547 Monochrome Camera sensor Module](https://www.xilinx.com/products/som/kria/kr260-robotics-starter-kit/imx547-camera-kit-monochrome.html) OR [Sony IMX547 Color Camera sensor Module](https://www.xilinx.com/products/som/kria/kr260-robotics-starter-kit/imx547-camera-kit-color.html)
+10. [Sony IMX547 Monochrome Camera sensor Module](https://www.xilinx.com/products/som/kria/kr260-robotics-starter-kit/imx547-camera-kit-monochrome.html) OR [Sony IMX547 Color Camera sensor Module](https://www.xilinx.com/products/som/kria/kr260-robotics-starter-kit/imx547-camera-kit-color.html)
 
-9. 10G NIC Card
+11. [10G NIC Card](https://www.amazon.com/dp/B06X9T683K)
 
-10. 10G SFP+ Transceiver
+12. [Two 10G SFP+ Transceivers](https://www.amazon.com/dp/B08BP55663)
 
-Some reference for 10G NIC Card, fiber optic cable, 10G SFP+ Transceiver are listed below:
-
-10G Network cards:
-
-- [X520-10G-1S](https://www.amazon.com/dp/B01LZRSQM9?pd_rd_i=B01LZRSQM9&pd_rd_w=TcxxK&pf_rd_p=3465d0d7-4e28-4692-b633-326c458deaa4&pd_rd_wg=KlLZ9&pf_rd_r=DW3Z81ZGWVXPFSR0KAFN&pd_rd_r=68b63a0c-1d6b-4770-80e0-79ad47e1a511) (not tested yet at S2I)
-
-- [E10G42BTDA X520-da2](https://www.amazon.de/E10G42BTDA-10Gbps-Ethernet-Adapter-X520-da2/dp/B002I9L7PS/ref=sr_1_16?crid=3VYPG8MA3C5PL&dchild=1&keywords=intel+sfp%2B10g&qid=1621936558&sprefix=intel+sfp%2B%2Caps%2C195&sr=8-16) (might
-    need Intel coded SFP+ modules)
-
-Fiber Cable:
-
-- [OM3 LC-LC Fiber Optic Patch Cable Multimode 10Gb](https://www.amazon.com/dp/B089K3VYZ1/ref=sspa_dk_detail_1?pd_rd_i=B0897B8SW7&pd_rd_w=OvoqM&pf_rd_p=5d846283-ed3e-4512-a744-a30f97c5d738&pd_rd_wg=Jh1DR&pf_rd_r=GC2RTS0AHW0JF70BFD4B&pd_rd_r=4f75d78a-f377-4749-bdcd-ee4a7c207f09&spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUExRzJBWlQxUFRVS1NOJmVuY3J5cHRlZElkPUEwNzA3NTk0Mzc2UUFFNUpRRTkwQyZlbmNyeXB0ZWRBZElkPUEwNDYxMzA0MlRPNjY3UllTV1RJVCZ3aWRnZXROYW1lPXNwX2RldGFpbF90aGVtYXRpYyZhY3Rpb249Y2xpY2tSZWRpcmVjdCZkb05vdExvZ0NsaWNrPXRydWU&th=1)
-
-Two SFP+ Modules:
-
-- [10GBase-SR SFP+ Transceiver](https://www.amazon.com/10Gtek-SFP-10G-SR-Transceiver-10GBASE-SR-300-meter/dp/B08BP55663/ref=pd_bxgy_img_2/143-6278076-9705018?_encoding=UTF8&pd_rd_i=B00U8Q7946&pd_rd_r=5e4b9782-8061-4262-8bc7-c59b5e76d816&pd_rd_w=izpJI&pd_rd_wg=XpNSU&pf_rd_p=fd3ebcd0-c1a2-44cf-aba2-bbf4810b3732&pf_rd_r=Z768SJSGXZWNJXANGWVW&refRID=Z768SJSGXZWNJXANGWVW&th=1)
-
-### Setting Up the Live Source
+### Setting Up the Live Source for Defect-Detect
 
 When setting up the SOM Board for the live camera source capturing mango image displayed on a monitor, adhere to the following guidelines:
 
-- Keep the IMX547 Camera module firmly held in a static position.
-- IMX547 Camera module should be directly opposite to the monitor (180 deg).
-- In the test environment, keep the IMX547 Camera Module at an appropriate distance (35 cm) from the monitor.
-- According to the model of the monitor, set brightness and contrast to 45 and 17, respectively.
-- Ensure that the room is closed. To get a clearer preview image, add an artificial light source against the monitor.
+- Keep the IMX547 Camera module firmly held in a static position, preferably on a tripod and at a height of ~17 cm from the base.
+- IMX547 Camera module should be facing straight directly to the monitor(not at an angle) at an appropriate distance of ~35 cm from the screen.
+- According to the model of the monitor(Dell U2718Q Ultra Sharp 27 used here), set brightness and contrast to 94 and 85, respectively. Optimal values may be different for different make/model.
+- The setup should be covered completely so that no outside light is captured by the sensor.
 - To avoid over exposure of light, do NOT place the monitor opposite to an open door or window.
 - Ensure that the live source is able to capture the mango completely.
 - The camera should be focused ONLY on the mango image that was displayed.
-- In the test environment, the light intensity is to be ~1280 LUX.
+- The setup should be as follows:
 
-   **Note**: If the preview image is not satisfactory, adjust the above mentioned parameters.
+    ![IMX547 Sensor Camera](./media/IMX547_Camera_Setup.jpg)
+
+   **Note**: The above setup should be covered completely so that no outisde light is captured by the sensor. In the setup above, a black cloth is used to cover the setup entirely. 
+   If the preview image is not satisfactory, adjust the above mentioned parameters. Adjust the camera aperture using the adjustment ring on the sensor lens. For Monochrome and Color sensor set 
+   it to 1.6 and 0.8 respectively.
 
 ### Setting Up the Test Environment
 
@@ -83,37 +69,34 @@ Download all the sample mango images from the [Cofilab site](http://www.cofilab.
 
 ***Note***: If the file fails to download, copy the link and open in a new browser tab to download the file.
 
-As the downloaded images are in a JPG format, convert them into the GRAY8 (Y8) format using the following steps.
+As the downloaded images are in a JPG format, convert them into the GRAY8 (Y8) or RGB (RGB) format using the following steps:
 
 1. Unzip the downloaded rar file.
 
 2. In the Linux PC, go to `DB_mango`.
 
-3. Copy and save the following script as **convert_jpeg_y8.sh**:
+3. Clone the repo and navigate to scripts directory:
 
-   ```shell
-   for file in ./*; do       
-   f=$(echo "${file##*/}");
-     filename=$(echo $f| cut  -d'.' -f 1); #file has extension, it return only filename
-       echo $filename
-         gst-launch-1.0 filesrc location=$file ! jpegdec  ! videoconvert  ! videoscale ! video/x-raw, width=1920, height=1080, format=GRAY8 ! filesink location=$filename.y8
-   done
-   cat Mango_*.y8 > input_video.y8
+   ```bash
+   git clone https://github.com/Xilinx/mv-defect-detect
+   cd mv-defect-detect/scripts
    ```
 
-4. Make the script executable: `chmod +x convert_jpeg_y8.sh`
+4. Copy the scripts to `DB_Mango` directory
 
-5. Run the script `convert_jpeg_y8.sh` as follows:
+5. Run the scripts as follows:
 
    ```shell
-   ./convert_jpeg_y8.sh >& file.txt
+   ./convert_jpeg_y8.sh >& file.txt     For GRAY8 format
+
+   ./convert_jpeg_rgb.sh >& file.txt    For RGB format
    ```
 
-   Once the above command is completed, the script produces `input_video.y8` as input to the MV-Defect-Detect application.
+   Once the above command is completed, the script produces `input_video.y8 | input_video.rgb` as input to the MV-Defect-Detect application.
 
-6. Copy `input_video.y8` from the Linux PC to the SOM board. If copied to an SD card, it can be found in `/boot/firmware/input_video.y8`. For containers to access the file, copy it to `/tmp/` and containers can then also access it from its /tmp/ folder. Then copy it to `/home/` directory in the container.
+6. Copy the video from the Linux PC to the SOM board. If copied to an SD card, it can be found in `/boot/firmware/<input_video.y8/rgb>`. For containers to access the file, copy it to `/tmp/` and containers can then also access it from its /tmp/ folder. Then copy it to `/home/` directory in the container.
 
-   > ***Note***: Delete all files *except* `input_video.y8`.
+   > ***Note***: Delete all files *except* `input_video.y8 or input_video.rgb`.
 
 The MV-Defect-Detect application's design takes, processes, and displays images on to the monitor.
 
@@ -129,21 +112,26 @@ Refer to the following KR260 Board and Interface layout for connector reference 
 
 1. Go through the [Booting Kria Starter Kit Linux](../../kria_starterkit_linux_boot.md) to complete minimum setup required to boot Linux before continuing with the instructions in this page.
 
-2. Ensure that the board is powered off. Connect IMX547 Monochrome sensor module to J22 in KR260 using flex cable. Refer to the following figure:
-
-    ![IMX547 Sensor Camera](media/IMX547_sensor_camera_1.png)
-
-    ![IMX547 Sensor Camera](media/IMX547_sensor_camera_2.png)
+2. Ensure that the board is powered off. Connect IMX547 Monochrome sensor module to J22 in KR260 using flex cable.
 
 3. Keep the KR260 board and sensor module firmly held in a static position.
 
 4. Connect the Ethernet cable from PS ethernet \'J10C\' to local network with DHCP enabled to install packages.
 
-5. Connect the fiber optic cable to SFP+ connector in the KR260 board, other end to host machine (Windows/Ubuntu) NIC card.
+5. Connect the fiber optic cable to SFP+ connector in the KR260 board, other end to host machine (Windows/Ubuntu) NIC card as follows:
 
-The KR260 board connection should be as shown in the following figure:
+    ![KR260 SFP+](./media/KR260_SFP+_Host.jpg)
 
-![Board Connection](media/KR_260_Board_connection.png)
+### Tested Artifacts
+
+Testing was performed with the following artifacts:
+
+| Component                           | Version                                                 |
+|-------------------------------------|---------------------------------------------------------| 
+| Boot Firmware                       | BOOT_xilinx-k26-starterkit-v2022.1-09152304_update3.BIN |
+| Linux Kernel                        | 5.15.0-1030                                             |
+| xlnx-firmware-kr260-mv-camera-mono  | 0.12-0xlnx1                                             |
+| xlnx-firmware-kr260-mv-camera-color | 0.12-0xlnx1                                             |
 
 ### Host Machine Setup
 
@@ -152,9 +140,7 @@ The KR260 board connection should be as shown in the following figure:
   - `ifconfig -a` for ubuntu host
   - `ipconfig /all` for windows host
 
-* Install the 10Gb PCIe NIC Network Card in the PCIe slot as shown in the following figure:
-
-  ![Host Machine Setup](media/Host_machine_setup.png)
+* Install the 10Gb PCIe NIC Network Card in the PCIe slot of host machine.
 
 * Connect the fiber optic cable one end to the NIC card in host machine and the other end to the KR260 board SFP+ connector.
 
@@ -186,6 +172,15 @@ Install the latest application packages.
     ```
 
     > ***Note***: Installing firmware binaries might cause dfx-mgr to crash and a restart is needed, which is listed in the [Known issues and Limitations](known_issues.md) section. Once this is fixed, newer updates are available for the dfx-manager and restart might not be needed.
+
+3. Install `qv4l2`, GUI like test bench application for video4linux devices, which can be used to tune the sensor/ISP parameters as an alternative to standard `v4l2-ctl` commands
+
+    ```bash
+      sudo apt install qv4l2
+    ```
+    > **Note**: The default sensor/ISP parameters are set to defect-detection mode, which uses a completely covered setup and blocks sensor from capturing any natural light. Please tune the 
+    sensor/ISP settings, via v4l2 commands or GUI, to optimal values based on your lighting conditions for 10Gige or defect-detect in bypass mode. The process to tune the settings are
+    outlined in the "Sensor Calibration for the Live Source" further below.
 
 ## Docker based application preparation
 
@@ -263,7 +258,7 @@ The MV-Camera application firmware consists of bitstream (bit.bin) and device tr
         -v /lib/firmware/xilinx:/lib/firmware/xilinx \
         -v /run:/run \
         -h "xlnx-docker" \
-        -it xilinx/mv-defect-detect:2022.1 bash
+        -it xilinx/mv-defect-detect:2022.2 bash
   ```
 
 *  It launches the mv-defect-detect docker image container.
@@ -470,14 +465,7 @@ To run the application, follow the steps mentioned below:
 
 ## Running the MV-Defect-Detect Application
 
-Follow the procedure mentioned below to invoke the MV-Defect-Detect application: command line.
-
-To view the mv-defect-detect output on the display, disable the alpha plane using the following command.
-
-```bash
-modetest -D fd4a0000.display -s 43@41:1920x1080-60@BG24 -w 40:"alpha":0
-modetest -D fd4a0000.display -s 43@41:1920x1080-60@BG24 -w 40:"g_alpha_en":0
-```
+Follow the procedure mentioned below to invoke the MV-Defect-Detect application.
 
 ### Command Line
 
@@ -512,17 +500,18 @@ Help Options:
 Application Options:
 
 ```bash
--i, --infile=file path                                       Location of input file
--f, --outfile=file path                                      Location of output file
--w, --width=1920                                             Resolution width of the input
--h, --height=1080                                            Resolution height of the input
--o, --output=0                                               Display/dump stage on DP/File
--r, --framerate=60                                           Framerate of the input source
--d, --demomode=0                                             For Demo mode value must be 1
+-i, --infile=file path                                                   Location of input file
+-f, --outfile=file path                                                  Location of output file
+-s, --sensor-fmt                                                         Sensor format i.e mono or color
+-w, --width=1920                                                         Resolution width of the input
+-h, --height=1080                                                        Resolution height of the input
+-o, --output=0                                                           Display/dump stage on DP/File
+-r, --framerate=60                                                       Framerate of the input source
+-d, --demomode=0                                                         For Demo mode value must be 1
 -c, --cfgpath=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/    JSON config file path
 ```
 
-The application is targeted to run an input source that supports GRAY8 (Y8) format with a resolution of **1920x1080**.
+The application is targeted to run an input source that supports GRAY8 (Y8) or RGB (RGB) format with a resolution of **1920x1080**.
 
 Once done with the MV-Defect-Detect application, To switch to another accelerator application after mv-defect-detect application, first exit the docker container using ```exit```, then unload the firmware by running the below command:
 
@@ -530,7 +519,7 @@ Once done with the MV-Defect-Detect application, To switch to another accelerato
 sudo xmutil unloadapp
 ```
 
-### Command Examples
+### Command Examples for Monochrome sensor
 
 **Examples:** Follow the below examples for different use cases of the above mentioned command options.
 
@@ -540,67 +529,138 @@ sudo xmutil unloadapp
 
   Command  | Description
   ------------- | -------------
-  `mv-defect-detect -i input.y8 -o 0 -f out_raw.y8`  | Raw output dumps into file.
-  `mv-defect-detect -i input.y8 -o 1 -f out_preproc.y8`  | Pre-process output dumps into file.
-  `mv-defect-detect -i input.y8 -o 2 -f out_final.y8`  | Final output dumps into file.
+  `mv-defect-detect -i input.y8 -o 0 -f out_raw.y8 -s mono`  | Raw output dumps into file.
+  `mv-defect-detect -i input.y8 -o 1 -f out_preproc.y8 -s mono`  | Pre-process output dumps into file.
+  `mv-defect-detect -i input.y8 -o 2 -f out_final.y8 -s mono`  | Final output dumps into file.
 
-  ***Note***: File-In and File-Out demo mode is not supported.
+  ***Note***: File-In and File-Out demo mode is not supported. To playback the generated output video files run the File-In and Display out command by replacing the path of `-i` input video file.
 
-* For File-In and Display-Out mode, run the following command.
-
-   Command  | Description
-  ------------- | -------------
-  `mv-defect-detect -i input.y8`  | Raw output displays on DP. Input file path should change as per the requirement.
-  `mv-defect-detect -i input.y8 -o 0`  | This command is same as the above command. Raw output displays on DP. Input file path should change as per the requirement.
-  `mv-defect-detect -i input.y8 -o 1`  | Preprocess output displays on DP. Input file path should change as per the requirement.
-  `mv-defect-detect -i input.y8 -o 2`  | Final output displays on DP. Input file path should change as per the requirement.
-
-* For File-In and Display-Out demo mode, run the following command.
+* For File-In and Display-Out, run the following command.
 
    Command  | Description
   ------------- | -------------
-  `mv-defect-detect -i input.y8 -d 1`  | Raw output displays on DP. Input file path should change as per the requirement.
-  `mv-defect-detect -i input.y8 -o 0 -d 1`  | This command is same as the above command. Raw output displays on DP. Input file path should change as per the requirement.
-  `mv-defect-detect -i input.y8 -o 1 -d 1`  | Preprocess output displays on DP. Input file path should change as per the requirement.
-  `mv-defect-detect -i input.y8 -o 2 -d 1`  | Final output displays on DP. Input file path should change as per the requirement.
+  `mv-defect-detect -i input.y8 -o 0 -d 1 -s mono`       | Raw output displays on DP.Input file path should change as per the requirement.
+  `mv-defect-detect -i input.y8 -o 1 -d 1 -s mono`       | Preprocess output displays on DP. Input file path should change as per the requirement.
+  `mv-defect-detect -i input.y8 -o 2 -d 1 -s mono`       | Final output displays on DP. Input file path should change as per the requirement.
 
 * For Live-In and File-Out mode, run the following command.
 
    Command  | Description
   ------------- | -------------
-  `mv-defect-detect -o 0 -f out_raw.y8`  | Raw output dumps into file.
-  `mv-defect-detect -o 1 -f out_preproc.y8`  | Preprocess output dumps into file.
-  `mv-defect-detect -o 2 -f out_final.y8`  | Final output dumps into file.
+  `mv-defect-detect -o 0 -f out_raw.y8 -s mono`  | Raw output dumps into file.
+  `mv-defect-detect -o 1 -f out_preproc.y8 -s mono`  | Preprocess output dumps into file.
+  `mv-defect-detect -o 2 -f out_final.y8 -s mono`  | Final output dumps into file.
 
-  ***Note***: Live-In and File-Out demo mode is not supported.
-
-* For Live-In and Display-Out mode, run the following command.
-
-   Command  | Description
-  ------------- | -------------
-  `mv-defect-detect -o 0`  | Raw output displays on DP.
-  `mv-defect-detect -o 1`  | Preprocess output displays on DP.
-  `mv-defect-detect -o 2`  | Final output displays on DP.
+  ***Note***: Live-In and File-Out demo mode is not supported. To playback the generated output video files run the File-In and Display out command by replacing the path of `-i` input video file.
 
 * For Live-In and Display-Out mode, run the following command.
 
    Command  | Description
   ------------- | -------------
-  `mv-defect-detect -o 0 -d 1`  | Raw output displays on DP.
-  `mv-defect-detect -o 1 -d 1`  | Preprocess output displays on DP.
-  `mv-defect-detect -o 2 -d 1`  | Final output displays on DP.
+  `mv-defect-detect -o 0 -s mono`  | Raw output displays on DP.
+  `mv-defect-detect -o 1 -s mono`  | Preprocess output displays on DP.
+  `mv-defect-detect -o 2 -s mono`  | Final output displays on DP.
 
-### **Sensor Calibration for the Live Source**
+### Command Examples for Color Sensor
 
-You can use v4l2 utilities to tune various sensor parameters. For example:
+**Examples:** Follow the below examples for different use cases of the above mentioned command options.
 
-`v4l2-ctl -d /dev/v4l-subdev0 -c exposure=10000`
+***Note***: Only one instance of the application can run at a time.
 
-`v4l2-ctl -d /dev/v4l-subdev0 -c black_level=150`
+* For File-In and File-Out mode, run the following command.
 
-`v4l2-ctl -d /dev/v4l-subdev0 -c gain=250`
+  Command  | Description
+  ------------- | -------------
+  `mv-defect-detect -i input.rgb -o 0 -f out_raw.rgb -s color`  | Raw output dumps into file.
+  `mv-defect-detect -i input.rgb -o 1 -f out_preproc.y8 -s color`  | Pre-process output dumps into file.
+  `mv-defect-detect -i input.rgb -o 2 -f out_final.y8 -s color`  | Final output dumps into file.
 
-### **File Structure of the MV-Defect-Detect Application**
+   ***Note***: File-In and File-Out demo mode is not supported. To playback the generated output video files run the File-In and Display out command by replacing the path of `-i` input video file. For playing back stage `-o {1|2}` please use `-s mono` since the video is in GRAY8 (y8) format.
+
+* For File-In and Display-Out, run the following command.
+
+   Command  | Description
+  ----------------- | -------------
+  `mv-defect-detect -i input.rgb -o 0 -d 1 -s color`      | Raw output displays on DP. Input file path should change as per the requirement.
+  `mv-defect-detect -i input.rgb -o 1 -d 1 -s color`      | Preprocess output displays on DP. Input file path should change as per the requirement.
+  `mv-defect-detect -i input.rgb -o 2 -d 1 -s color`      | Final output displays on DP. Input file path should change as per the requirement.
+
+* For Live-In and File-Out mode, run the following command.
+
+   Command  | Description
+  ------------- | -------------
+  `mv-defect-detect -o 0 -f out_raw.rgb -s color`  | Raw output dumps into file.
+  `mv-defect-detect -o 1 -f out_preproc.y8 -s color`  | Preprocess output dumps into file.
+  `mv-defect-detect -o 2 -f out_final.y8 -s color`  | Final output dumps into file.
+
+  ***Note***: File-In and File-Out demo mode is not supported. To playback the generated output video files run the File-In and Display out command by replacing the path of `-i` input video file. For playing back stage `-o {1|2}` please use `-s mono` since the video is in GRAY8 (y8) format.
+
+* For Live-In and Display-Out mode, run the following command.
+
+   Command  | Description
+  ------------- | -------------
+  `mv-defect-detect -o 0 -s color`  | Raw output displays on DP.
+  `mv-defect-detect -o 1 -s color`  | Preprocess output displays on DP.
+  `mv-defect-detect -o 2 -s color`  | Final output displays on DP.
+
+### Sensor Calibration for the Live Source
+
+- You can use v4l2 utilities to tune various sensor parameters. For example:
+
+  ```bash
+  v4l2-ctl -d /dev/video0 -L                      List all available parameters to tune
+
+  v4l2-ctl -d /dev/video0 -c exposure=10000       Tune and set the exposure to some value
+
+  v4l2-ctl -d /dev/video0 -c black_level=150      Tune and set the black_level to some value
+
+  v4l2-ctl -d /dev/video0 -c gain=250             Tune and set the gain to some value
+
+  v4l2-ctl -d /dev/video0 -c red_gain=250         Tune and set the red_gain to some value
+  ```
+
+- Alternatively, you can also use qv4l2 to tune the sensor parameters through a GUI.
+
+- To use qv4l2, the command should run over an SSH connection with X-forwarding enabled.
+
+- On Host, run:
+
+    ```bash
+    ssh -X ubuntu@<Kria Starter Kit IP address>
+    ```
+    **NOTE**: If all ethernet cables are plugged in, feel free to use any IP.
+
+- On Windows, download [Mobaxterm](https://mobaxterm.mobatek.net/download.html), which automatically enables X-forwarding when creating a new ssh connection.
+
+- Verify if the SSH terminal is using the correct authority file.
+  * The output should look something like this.
+   ```bash
+   ubuntu@kria:~$ xauth -v list
+   Using authority file /home/ubuntu/.Xauthority
+   kria/unix:10  MIT-MAGIC-COOKIE-1  f5212118305f75678a69daa4a6eda703
+   ```
+   * If incorrect or no authority file is present, do the following steps:
+   ```bash
+   ubuntu@kria:~$ rm -rf ~/.Xaut*
+   ```
+   * Reboot the target board.
+   ```bash
+   ubuntu@kria:~$ sudo reboot
+   ```
+   * Check the `xauth -v list` after reboot(in SSH terminal), it should display 
+   the correct authority file on the output console.
+
+- You can now run the following command on SSH side to open up the qv4l2 GUI.
+  ```bash
+  ubuntu@kria:~$ qv4l2 -d /dev/video0
+  Using mplane plugin for capture
+  ```
+
+- Use the GUI to tune the sensor/ISP params:
+
+    ![QV4l2](./media/qv4l2_tuning.JPG)
+
+### File Structure of the MV-Defect-Detect Application
 
 The application is comprised of the following files:
 
@@ -647,13 +707,14 @@ Below files are present in *lib* directory:
 | libvvas_cca.so       | vvas CCA accelerator library |
 | libvvas_text2overlay.so       | vvas text2overlay library |
 
-The following files are present in the *vvas* directory:
+There are two sets of `json` files present, one set for mono and other for color. Below are the paths and the files present:
 
-   `/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/`
+   `/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/mono` and `/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/color`
 
 | File name              | Description                                            |
 |-----------------------|--------------------------------------------------------|
 | cca-accelerator.json         | Configuration of CCA accelerator               |
+| cca-accelerator-stride.json  | Configuration of CCA accelerator with stride   |
 | otsu-accelarator.json   | Configuration of OTSU accelerator              |
 | preprocess-accelarator.json  | Configuration of pre-process accelarator           |
 | preprocess-accelarator-stride.json          | Configuration of pre-process accelarator with stride |
@@ -661,8 +722,11 @@ The following files are present in the *vvas* directory:
 
 ## Next Steps
 
-- [System Architecture of the Platform](sw_arch_platform_dd.md)
-- Go back to the [MV Camera 10GigE](10gige.md)
+- [Hardware Architecture of the Platform](10gige.md)
+- [Hardware Architecture of the Accelerator](hw_arch_accel_dd.md)
+- [Software Architecture of the Platform](sw_arch_platform_dd.md)
+- [Software Architecture of the Accelerator](sw_arch_accel_dd.md)
+- Go back to the [Introduction](introduction.md)
 
 <!---
 
@@ -673,4 +737,4 @@ You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
 -->
-<p align="center"><sup>Copyright&copy; 2023 Advanced Micro Devices, Inc.</sup></p>
+<p align="center"><sup>Copyright&copy; 2023 - 2024 Advanced Micro Devices, Inc.</sup></p>
