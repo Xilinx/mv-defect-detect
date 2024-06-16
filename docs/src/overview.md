@@ -12,31 +12,41 @@
 
 # Overview
 
-The Machine Vision (MV) Camera Defect Detect Application uses a Sony IMX547 sensor module, which interfaces to the KR260 with the widely adopted SLVS-EC interface standard.
+The Machine Vision (MV) Camera Application uses a Sony IMX547 sensor, mono or color module, which interfaces to the KR260 board with the widely adopted SLVS-EC interface standard.
 
-The FPGA implements a SLVS-EC receiver IP core that is provided by third-party IP company [Framos](https://www.framos.com/framos-slvs-ec-rx-ip-core) and a 10GigE Vision pipeline using a series of IP cores from third-party IP company [Sensor-to-Image](https://www.euresys.com/en/Products/IP-Cores/Vision-Standard-IP-Cores-for-FPGA/GigE-Vision-IP-Core-(2)). As these third-party IPs are not open-source, contact the third-party contacts via [Product Inquiry](https://www.xilinx.com/products/app-store/kria/10gige-vision-camera/product-inquiry.html) to create custom and product designs.
+The SLVS-EC receiver IPs [(Third Party IP from Framos)](https://www.framos.com/framos-slvs-ec-rx-ip-core)  converts the incoming sensor data to MONO or BAYER8 stream data.  
 
-The KR260 carrier card has the interface for Euresys 10GigE. 10GigE pipeline consists of multiple IP such as GenDC, Framebuffer, 10GigE MAC, and so on. GenDC Front-End IP core implements GenICam protocol GenDC layer to be used together with additional machine vision interfacing IP cores provided by Sensor to Image(S2I). Frame Buffer companion IP implements a video frame buffering functionality, packetization, and optional packet resending. The data divided into packets is transmitted to the back-end IP cores implementing particular machine vision interfaces like GigE Vision. Using SFP+ packets are sent to host machine and displayed in the Sphinx GEV Viewer software.
+This stream data is broadcasted to two paths, 10GigE pipeline and Defect Detect pipeline.
 
-From the capture pipeline, AXI broadcaster gives two outputs to 10gige pipeline and mv-defect detect pipeline, respectively.
-MV-Defect-Detect application uses AMD Vitis&trade; Vision libraries to examine each mango and mark its defects. This enables customers to strategically sell their best mangoes, leading to enhanced revenue and creates a mutually beneficial situation for both the customers and the consumers.
+The 10GigE Vision pipeline IPs [(Third Party IP from Sensor-to-Image)](https://www.euresys.com/en/Products/IP-Cores/Vision-Standard-IP-Cores-for-FPGA/GigE-Vision-IP-Core-(2)) transmits the stream data on the SFP+ interface available on the KR260 carrier card. The 10GigE packets are sent to host machine. The Frame Grabber software interprets the incoming packets and displays it the Sphinx GEV Viewer. 
+
+Defect Detect pipeline uses AMD Vitis&trade; Vision libraries to build a defect detection function for  mangoes. The sensor could be pointing to queue of mangoes and the defect detect application can indicate which mangoes are defective.  This is the acceleration function implemented in the design and can replaced by any other acceleration function as desired. The output of the defect detection is displayed on a monitor.
 
 The MV-Camera high level pipeline is depicted in the following figure:
 
 ![KR260 Overview Diagram](media/Overview_diagram.PNG)
 
+The third-party IPs are not open-source. To create custom designs, contact the third-party vendors via [Product Inquiry](https://www.xilinx.com/products/app-store/kria/10gige-vision-camera/product-inquiry.html) 
+
 ## Features
 
-1) IMX547 Camera Sensor with 5.1 Mega Pixel/2472 x 2128 pixel with max framerate of 122 fps.
+1) IMX547 Camera Sensor color or mono with 5.1 Mega Pixel, 2472 x 2128 resolution with max framerate of 122 fps.
 
-2) Sphinx GEV Viewer to display the live streaming data through 10 GigE pipeline.
+2) Sphinx GEV Viewer running on X86 host PC to display the live streaming data through 10GigE pipeline.
 
-3) MV-Defect-Detect acceleration pipelines are to detect defects in the input mango images.
+3) MV-Defect-Detect acceleration application to detect defects in the input mango images, displayed on monitor connected to the KR260.
+
+## References
+* [Kria™ KR260 Robotics Starter Kit](https://www.amd.com/en/products/system-on-modules/kria/k26/kr260-robotics-starter-kit.html)
+* [HW-IMX547C-SK-G Camera Kit Color ](https://www.amd.com/en/products/system-on-modules/kria/k26/kr260-robotics-starter-kit/imx547-camera-kit-color.html)
+* [HW-IMX547M-SK-G Camera Kit Monochrome](https://www.amd.com/en/products/system-on-modules/kria/k26/kr260-robotics-starter-kit/imx547-camera-kit-monochrome.html)
+
 
 ## Next Steps
 
 * [Introduction](introduction.md)
 * Go back to the [MV Camera Landing Page](../10gige_vision_camera_landing)
+
 
 <!---
 
@@ -47,4 +57,4 @@ You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
 -->
-<p align="center"><sup>Copyright&copy; 2023 Advanced Micro Devices, Inc.</sup></p>
+<p align="center"><sup>Copyright&copy; 2023 - 2024 Advanced Micro Devices, Inc.</sup></p>

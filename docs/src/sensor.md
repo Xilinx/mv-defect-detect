@@ -18,7 +18,7 @@ The Sony IMX547 is a diagonal 8.8 mm (Type 1/1.8) CMOS active pixel, solid-state
 
 ## Overview of FSA (Framos Sensor Adapter) Module
 
-The FSA (Framos Sensor Adapter) connects to the FSM (Framos Sensor Module) allowing with Sub-LVDS, SLVS, or SLVS-EC devices.
+The FSA (Framos Sensor Adapter) connects to the FSM (Framos Sensor Module) supporting Sub-LVDS, SLVS, or SLVS-EC devices.
 
 ![FSA](./media/image001.png)
 
@@ -181,12 +181,11 @@ The SLVS-EC RX IP Core ports are listed in the following table, where `LANE_NUM`
 
 ### Framos IPs license
 
-For more information about how the Framos SLVS-EC RX IP-Core would benefit your next project. To request the full SLVS-EC IP-Core integration support, contact the Framos imaging experts at <sales@framos.com>.
+For more information about how the Framos SLVS-EC RX IP-Core would benefit your next project and to request full SLVS-EC IP-Core integration support, contact the Framos imaging experts at <sales@framos.com>.
 
 ## Next Steps
 
-- [10gige](10gige.md)
-- Go back to the [MV Camera Introduction](introduction.md)
+- Go back to the [Hardware Architecture of the Platform](10gige.md)
 
 <!---
 
@@ -197,4 +196,4 @@ You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
 -->
-<p align="center"><sup>Copyright&copy; 2023 Advanced Micro Devices, Inc.</sup></p>
+<p align="center"><sup>Copyright&copy; 2023 - 2024 Advanced Micro Devices, Inc.</sup></p>

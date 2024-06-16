@@ -10,54 +10,85 @@
  </tr>
 </table>
 
-# Introduction to Sensor Capture, MV-Defect-Detect, and 10GigE
+# Introduction 
 
-The SLVS-EC Machine Vision application on an AMD Kria&trade; KR260 board demonstrates the use of an AMD Zynq&trade; Ultrascale+™ device together with Framos SLVS-EC IP and Sensor to Image 10GigE Vision IP to build a machine vision application according to the GigE Vision standard.
+The Machine vision application is built on the KR260 Robotics Starter Kit and demonstrates use of SLVS-EC and GigE Vision standards for transferring of video frames. The design consists of four pipelines
 
-10GigE machine vision application developed on an AMD SOM embedded platform. This document covers various components such as Hardware, Software, High Level Design, Test Environment, and so on.
+* Capture pipeline : Capture images from IMX547 Sensor, color or monochrome
+* Image Sensor Processing (ISP) pipeline: Processes and improves the captured mango images
+* Acceleration pipeline: Runs defect detect function on the processed mango images
+* Output pipelines 
+  * 10GigE : Streams video data received from the the capture pipeline to a host system over 10G SFP+ Transceiver
+  * Display Port: Displays detection results and images of the mango at various stages.
 
-The following table lists the specific hardware (SOM + Carrier card) and the associated peripherals used in the MV-Camera accelerated application.
+ The design has a platform and integrated accelerator functions. The platform consists of capture pipeline, output pipelines, and some video processing functions. This approach makes the design leaner and provides maximum programmable logic (PL) for the accelerator development.
 
-| **HW Component**        | **Description**           |
-| :------------- |:-------------|
-| SOM-K26      | K26 SOM with an AMD Zynq&trade; UltraScale+™ MPSoC |
-| Carrier Card (CC)-KR260     | The board that the SOM is plugged into is called the Carrier Card    |
-| FSM*     | Framos sensor module, which has an IMX547 sensor + FSA    |
-| NIC*     | 10G NIC card     |
-| 10G SFP+ Transceiver*     | Transceiver to connect fiber optic cable    |
-| Fiber optic cable*     | Fiber optic cable to connect KR260 to host machine  |
-| 1080p Monitor     | MV-Defect-Detect output displays on DP Monitor  |
-| DP Cable     | Connects KR260 board and DP monitor  |
+The Application Processing Unit (APU) in the Processing System (PS) consists of four ARM Cortex-A53 cores and is configured to run in Symmetric Multi-Processing (SMP) Linux mode in the design. The application running on Linux is responsible for configuring and controlling the pipelines.
 
-<*> This is not shipped along with the KRIA starter kit.
+The APU application controls the following video data paths implemented in the PL:
 
-The 10GigE reference design has the following pipelines:
+* Capture pipeline captures video frames from the IMX547 sensor through SLVS EC Interface, and converts data to Video AXI streams. The Video AXI streams are broadcasted to 10GigE pipeline and ISP Pipeline
+* ISP Pipeline receives streaming data from the capture pipeline, improves the video frame quality and writes the frame to DDR memory.
+* Acceleration Pipeline is implemented as a memory to memory pipeline. Each block in acceleration pipeline reads from DDR memory, processes the data, and writes back to memory
+* Output pipeline 
+  * Display pipeline reads video frames from memory, written by the acceleration blocks and sends the frame to Display Port sink.
+  * 10GigE pipeline transfers the AXI stream data carrying raw video frames via 10GigE Vision protocol through SFP+ transceiver, to the host machine. 
+  
+The application running on the host is responsible for interpreting the raw video stream. 
 
-- Capture Pipeline - Capture images from the live camera source.
+# Design Components
 
-- Sink Pipeline - Streaming video data via 10GigE pipeline.
+### Hardware components
 
-The Application Processing Unit (APU) in the Processing System (PS) consists of four ARM Cortex-A53 cores and is configured to run in Symmetric Multi-Processing (SMP) Linux mode in the design. The application running on Linux is responsible for configuring and controlling the video pipeline.
+* KR260 Robotics Starter Kit including:
+  * K26 SOM with an AMD Zynq&trade; UltraScale+™ MPSoC
+  * Carrier Card with SLVS-EC Rx connector, SFP+ cage and Display Port connector
+* Sony IMX547 Camera Kit Monochrome or Color*
+* 10G SFP+ Transceiver*
+* Fiber optic cable* connecting KR260 to the host machine*
+* 10G NIC card to be installed in the host machine*
+* 1080p Monitor to display defect detection results*
 
-The APU application controls the following video data paths implemented in a combination of the PS and PL:
+[*] Not included in the KR260 Starter Kit
 
-- Capture pipeline collects video frames from the IMX547 sensor interfaced through SLVS EC Interface, and it hand overs to the FPGA block where it converts into AXI streams.
-- Acceleration Pipeline:
-  *	Pre-Process Pipeline – Pre-Process received images as required for the processing function.
-  * CCA Pipeline – The implemented Connected Component Analysis (CCA) is a custom solution to find the defective pixels in the problem object. This algorithm considers few assumptions that the background must be easily separable from the foreground object.
-  * Defect Decision Pipeline - The output of the CCA plugin is fed into the Defect Decision block that determines the defect density and decides the quality of the mango.
+### Interfaces and IP
 
-- Display Pipelines – Display detection results and images of the mango at various stages.
+* Video inputs
+  * SLVS-EC Rx
+* Video outputs
+  * Display Port
+  * 10GigeE 
+* Video processing
+  * Vitis Vsion Accelerator functions 
+  * PL and PS based pre and post processing specific to a accelerator function
 
-- GenDC in the 10GigE pipeline receives the AXI stream data and converts it into GenICam protocol. Through SFP+ transceiver, the data transmits to host machine.
+### Software components
 
-The 10GigE application streams out the sensor's RAW format through 10GigE protocol.
+* Operating system
+  * APU: SMP Linux
+* Linux kernel subsystems
+  * Video source: Video4 Linux (V4L2)
+  * Display: Direct Rendering Manager (DRM)/Kernel Mode Setting (KMS)
+* Linux user space frameworks on KR260
+  * GStreamer/VVAS
+  * AMD Vitis&trade; AI
+  * Xilinx run-time (XRT)
+* Linux user space frameworks on host
+  * Frame Grabber SW stack
+  * Sphinx GEV Viewer
 
-For the live use case, connect the IMX547 sensor to capture 2472 x 2128\@122fps - 10bpp data. The application processes this data and sends the outputs to the host PC.
+### Supported Resolution and Formats
 
-## Next Steps
+* Resolutions
+  * 1080p on DP
+  * 2472x2128 on Sencor
+* Sensor Pixel formats
+  * MONO8
+  * BAYRG8
 
-- [Sensor](sensor.md)
+# Next Steps
+
+- [HW architecture of the platform](10gige.md) 
 - Go back to the [MV Camera Overview](overview.md)
 
 <!---
@@ -69,4 +100,4 @@ You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
 -->
-<p align="center"><sup>Copyright&copy; 2023 Advanced Micro Devices, Inc.</sup></p>
+<p align="center"><sup>Copyright&copy; 2023 - 2024 Advanced Micro Devices, Inc.</sup></p>
