@@ -126,12 +126,12 @@ Refer to the following KR260 Board and Interface layout for connector reference 
 
 Testing was performed with the following artifacts:
 
-| Component                           | Version                                                 |
-|-------------------------------------|---------------------------------------------------------| 
-| Boot Firmware                       | BOOT_xilinx-k26-starterkit-v2022.1-09152304_update3.BIN |
-| Linux Kernel                        | 5.15.0-1030                                             |
-| xlnx-firmware-kr260-mv-camera-mono  | 0.12-0xlnx1                                             |
-| xlnx-firmware-kr260-mv-camera-color | 0.12-0xlnx1                                             |
+| Component                           | Version          |
+|-------------------------------------|------------------|
+| Boot Firmware                       | K26-BootFW-01.01 |
+| Linux Kernel                        | 5.15.0-1030      |
+| xlnx-firmware-kr260-mv-camera-mono  | 0.12-0xlnx1      |
+| xlnx-firmware-kr260-mv-camera-color | 0.12-0xlnx1      |
 
 ### Host Machine Setup
 
