@@ -16,21 +16,29 @@ First review the [FAQ](https://xilinx.github.io/kria-apps-docs/faq.html) for com
 
 1. To get the maximum fps in the sphinx GEV viewer, you can change the draw value in sphinx --> options based on the host type (windows or ubuntu)
 
-    - On ubuntu host,
+   - On ubuntu host
 
-         For 60 fps, set the draw value to `10`.
+     For 60 fps, set the draw value to `10`.
 
-         For 120 fps, set the draw value to `50`.
+     For 120 fps, set the draw value to `50`.
 
-    - On windows host,
+   - On windows host
 
-         For 60/120 fps, set the draw value to `10`.
+      For 60/120 fps, set the draw value to `10`.
 
-         ![Sphinx GE Viewer](media/Sphinx_GE_Viewer.png)
+      ![Sphinx GE Viewer](media/Sphinx_GE_Viewer.png)
 
-2. To cross check the connection between KR260 target and host, use ping functionality. For Example, ping -I `<10G_interface_name> <ip address>`
+2. To cross check the connection between KR260 target and host, use ping functionality. For Example:
 
-3. To identify whether NIC card is inserted properly or not in ubuntu host machine PCIe slot, run this command `lspci -vvv | grep -i "82599 10 Gigabit Network"`
+   ```
+   ping -I <10G_interface_name> <ip address>
+   ```
+
+3. To identify whether NIC card is inserted properly or not in ubuntu host machine PCIe slot, run this command:
+
+   ```
+   lspci -vvv | grep -i "82599 10 Gigabit Network"
+   ```
 
 4. After inserting the 10G NIC card in windows host machine PCIe slot, check device manager for device detection and driver installation. If the driver is not installed for this device, install the driver from the given link: [NIC Card driver](https://www.intel.com/content/www/us/en/download/15084/intel-ethernet-adapter-complete-driver-pack.html).
 
@@ -39,120 +47,124 @@ First review the [FAQ](https://xilinx.github.io/kria-apps-docs/faq.html) for com
 6. To trigger the sensor stream-on, run the Gstreamer capture pipeline in the background using gst-launch-1.0 utility before starting the 10GigE application.
 
 7. To install the mv-camera firmware manually, use the following command.
+
     ```bash
-   apt install xlnx-firmware-kr260-mv-camera
+   apt install xlnx-firmware-kr260-mv-camera-mono  // mono variant
+   apt install xlnx-firmware-kr260-mv-camera-color // color variant
    ```
 
    ***Note***: Ensure to run the apt update to get the latest firmware.
 
 8. Make sure to use the following command:
 
-    ```bash
-     sudo xmutil loadapp kr260-mv-camera
-    ```
+   ```bash
+   sudo xmutil loadapp kr260-mv-camera-mono  // mono variant
+   sudo xmutil loadapp kr260-mv-camera-color // color variant
+   ```
    to load the **mv-defect-detect** firmware properly. Otherwise, necessary drivers are not loaded. There might be some errors that popup when you run the **mv-defect-detect** application.
 
 9. Always unload existing firmware before loading the mv-defect-detect firmware.
 
-10. The Framerate displayed is only for Live Playback. To get the framerate on console, prepend the keywords `GST_DEBUG="*defect*:4"` in the GStreamer application/pipeline.
+10. The Framerate displayed is only for Live Playback. To get the framerate on console, prepend the GStreamer application as follows:
 
-   For Example: 
+    ```
+    GST_DEBUG="*defect*:4" mv-defect-detect
+    ```
 
-   `GST_DEBUG="*defect*:4" mv-defect-detect`
+### Gst-launch Examples for Live Input and Raw Output
 
-11. Following are some of the examples of Gstreamer pipelines:
+* Live In - Live Out - Mono
 
-***Note***: Run the following command before running any of the following pipelines, including the ones in the Demo mode.
+  ```
+  gst-launch-1.0 v4l2src device=/dev/video0 io-mode=5 ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 ! perf ! kmssink bus-id=fd4a0000.display fullscreen-overlay=true -v
+  ```
 
-   ```bash
-   modetest -D fd4a0000.display -s 43@41:1920x1080-60@BG24 -w 40:"alpha":0
-   modetest -D fd4a0000.display -s 43@41:1920x1080-60@BG24 -w 40:"g_alpha_en":0
+* Live In - Live Out - Color
+
+  ```
+  gst-launch-1.0 v4l2src device=/dev/video0 io-mode=5 ! video/x-raw, width=1920, height=1080, format=RGB, framerate=60/1 ! perf ! kmssink bus-id=fd4a0000.display fullscreen-overlay=true -v
+  ```
+
+* Live In - File Out - Mono
+
+  ```
+  gst-launch-1.0 v4l2src device=/dev/video0 ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 ! perf ! filesink location=out.y8 -v
+  ```
+* Live In - File Out - Color
+
+  ```
+  gst-launch-1.0 v4l2src device=/dev/video0 ! video/x-raw, width=1920, height=1080, format=RGB, framerate=60/1 ! perf ! filesink location=out.rgb -v
+  ```
+
+### Gst-launch Examples for Live Input and Pre-process Output
+
+* Live In - Live Out - Mono
+
+  ```
+  gst-launch-1.0 v4l2src device=/dev/video0 io-mode=4 ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/mono/otsu-accelarator.json ! queue ! video/x-raw, width=1920, height=1080, format=GRAY8 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/mono/preprocess-accelarator-stride.json ! video/x-raw, width=1920, height=1080, format=GRAY8 ! perf ! kmssink bus-id=fd4a0000.display fullscreen-overlay=true -v
+  ```
+
+* Live In - File Out - Color
+
+  ```
+  gst-launch-1.0 v4l2src device=/dev/video0 io-mode=4 ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/color/otsu-accelarator.json ! queue ! video/x-raw, width=1920, height=1080, format=GRAY8 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/color/preprocess-accelarator.json ! video/x-raw, width=1920, height=1080, format=GRAY8 ! perf ! filesink location=out.rgb -v
+  ```
+
+### Gst-launch Examples for Live Input and CCA with Text Overlay Output
+
+* Live In - Live Out - Color
+
    ```
-***Note***: Navigate to `/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/` and then run the gst-launch commands.
+   gst-launch-1.0 v4l2src device=/dev/video0 io-mode=4 ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/color/otsu-accelarator.json ! queue ! video/x-raw, width=1920, height=1080, format=GRAY8 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/color/preprocess-accelarator.json ! queue ! video/x-raw, width=1920, height=1080, format=NV16 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/color/cca-accelarator-stride.json ! queue ! video/x-raw, width=1920, height=1080, format=GRAY8 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/color/text2overlay.json ! video/x-raw, width=1920, height=1080, format=GRAY8 ! perf ! kmssink bus-id=fd4a0000.display fullscreen-overlay=true sync=false -v
+   ```
 
-#### For Live Input and Raw Output
+* Live In - File Out - Mono
 
-* Live In - Live Out
+  ```
+  gst-launch-1.0 v4l2src device=/dev/video0 io-mode=4 ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/mono/otsu-accelarator.json ! queue ! video/x-raw, width=1920, height=1080, format=GRAY8 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/mono/preprocess-accelarator.json ! queue ! video/x-raw, width=1920, height=1080, format=NV16 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/mono/cca-accelarator.json ! queue ! video/x-raw, width=1920, height=1080, format=GRAY8 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/mono/text2overlay.json ! video/x-raw, width=1920, height=1080, format=GRAY8 ! perf ! filesink location=out.y8 -v
+  ```
 
-  `gst-launch-1.0 v4l2src device=/dev/video0 io-mode=5 ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 ! perf ! kmssink bus-id=fd4a0000.display -v`
+### Gst-launch Examples for File Input and Raw Output
 
-* Live In - File Out
+* File In - Live Out - Mono
 
-  `gst-launch-1.0 v4l2src device=/dev/video0 ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 ! perf ! filesink location=out.y8 -v`
+  ```
+  gst-launch-1.0 filesrc location=./input.y8 blocksize=2073600 ! rawvideoparse use-sink-caps=false width=1920 height=1080 format=gray8 framerate=2/1 ! perf ! kmssink bus-id=fd4a0000.display fullscreen-overlay=true sync=true -v
+  ```
 
-* Live In - Live Out Demo mode
-  `gst-launch-1.0 v4l2src device=/dev/video0 io-mode=5 ! videorate ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=4/1 ! perf ! kmssink bus-id=fd4a0000.display -v`
+* File In - File Out - Color
 
-#### For Live Input and Pre-process Output
+  ```
+  gst-launch-1.0 filesrc location=./input.rgb blocksize=6220800 ! rawvideoparse use-sink-caps=false width=1920 height=1080 format=rgb framerate=2/1 ! perf ! filesink location=out.rgb -v
+  ```
 
-* Live In - Live Out
+### Gst-launch Examples for File Input and Pre-process Output
 
-  `gst-launch-1.0 v4l2src device=/dev/video0 io-mode=4 ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 !  vvas_xfilter kernels-config=otsu-accelarator.json ! queue  !  vvas_xfilter kernels-config=preprocess-accelarator-stride.json ! video/x-raw, width=1920, height=1080, format=GRAY8 ! perf !  kmssink bus-id=fd4a0000.display -v`
+* File In - Live Out - Color
 
-* Live In - File Out
+  ```
+  gst-launch-1.0 filesrc location=./input.rgb blocksize=6220800 ! rawvideoparse use-sink-caps=false width=1920 height=1080 format=rgb framerate=2/1 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/color/otsu-accelarator.json ! queue ! video/x-raw, width=1920, height=1080, format=GRAY8 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/color/preprocess-accelarator-stride.json ! queue ! video/x-raw, width=1920, height=1080, format=GRAY8 ! perf ! kmssink bus-id=fd4a0000.display fullscreen-overlay=true sync=true -v
+  ```
 
-  `gst-launch-1.0 v4l2src device=/dev/video0 io-mode=4 ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 !  vvas_xfilter kernels-config=otsu-accelarator.json ! queue  ! video/x-raw, width=1920, height=1080, format=GRAY8 !  vvas_xfilter kernels-config=preprocess-accelarator.json ! video/x-raw, width=1920, height=1080, format=GRAY8 ! perf !  filesink location=out.y8 -v`
+* File In - File Out - Mono
 
-* Live In - Live Out Demo mode
+  ```
+  gst-launch-1.0 filesrc location=./input.y8 blocksize=2073600 ! rawvideoparse use-sink-caps=false width=1920 height=1080 format=gray8 framerate=2/1 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/mono/otsu-accelarator.json ! queue ! video/x-raw, width=1920, height=1080, format=GRAY8 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/mono/preprocess-accelarator.json ! video/x-raw, width=1920, height=1080, format=GRAY8 ! perf ! filesink location=out.y8 -v
+  ```
 
-  `gst-launch-1.0 v4l2src device=/dev/video0 io-mode=4 ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 !  vvas_xfilter kernels-config=otsu-accelarator.json ! queue  !  vvas_xfilter kernels-config=preprocess-accelarator-stride.json ! videorate ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=4/1 ! perf !  kmssink bus-id=fd4a0000.display -v`
+### Gst-launch Examples for File Input and CCA with Text Overlay Output
 
-#### For Live Input and Final Output
+* File In - Live Out - Mono
 
-* Live In - Live Out
+  ```
+  gst-launch-1.0 filesrc location=./input.y8 blocksize=2073600 ! rawvideoparse use-sink-caps=false width=1920 height=1080 format=gray8 framerate=2/1 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/mono/otsu-accelarator.json ! queue ! video/x-raw, width=1920, height=1080, format=GRAY8 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/mono/preprocess-accelarator.json ! queue ! video/x-raw, width=1920, height=1080, format=NV16 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/mono/cca-accelarator-stride.json ! queue ! video/x-raw, width=1920, height=1080, format=GRAY8 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/mono/text2overlay.json ! video/x-raw, width=1920, height=1080, format=GRAY8 ! perf ! kmssink bus-id=fd4a0000.display fullscreen-overlay=true sync=true -v
+  ```
 
-   `gst-launch-1.0 v4l2src device=/dev/video0 io-mode=4 ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 !  vvas_xfilter kernels-config=otsu-accelarator.json ! queue  !  vvas_xfilter kernels-config=preprocess-accelarator-stride.json ! queue  ! vvas_xfilter kernels-config=cca-accelarator.json ! queue ! vvas_xfilter kernels-config=text2overlay.json ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 ! perf !  kmssink bus-id=fd4a0000.display -v`
+* File In - File Out - Color
 
-* Live In - File Out
-
-  `gst-launch-1.0 v4l2src device=/dev/video0 io-mode=4 ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 !  vvas_xfilter kernels-config=otsu-accelarator.json ! queue  !  vvas_xfilter kernels-config=preprocess-accelarator.json ! queue  ! vvas_xfilter kernels-config=cca-accelarator.json ! queue ! vvas_xfilter kernels-config=text2overlay.json ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 ! perf !  filesink location=t.y8 -v`
-
-* Live In - Live Out Demo mode
-
-  `gst-launch-1.0 v4l2src device=/dev/video0 io-mode=4 ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 !  vvas_xfilter kernels-config=otsu-accelarator.json ! queue  !  vvas_xfilter kernels-config=preprocess-accelarator-stride.json ! queue  ! vvas_xfilter kernels-config=cca-accelarator.json ! queue ! vvas_xfilter kernels-config=text2overlay.json ! videorate ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=4/1 ! perf !  kmssink bus-id=fd4a0000.display -v`
-
-#### For File Input and Raw Output
-
-* File In - Live Out
-
-  `gst-launch-1.0 filesrc location=./input.y8 blocksize=2073600  ! rawvideoparse use-sink-caps=false width=1920 height=1080 format=gray8 framerate=60/1 !  perf !  kmssink bus-id=fd4a0000.display -v`
-
-* File In - File Out
-
-  `gst-launch-1.0 filesrc location=./input.y8 blocksize=2073600  ! rawvideoparse use-sink-caps=false width=1920 height=1080 format=gray8 framerate=60/1 ! perf !   filesink location=out.y8 -v`
-
-* File In - Live Out Demo mode
-
-  `gst-launch-1.0 filesrc location=./input.y8 blocksize=2073600  ! rawvideoparse use-sink-caps=false width=1920 height=1080 format=gray8 framerate=4/1 ! perf !  kmssink bus-id=fd4a0000.display -v`
-
-#### For File Input and Pre-process Output
-
-* File In - Live Out
-
-   `gst-launch-1.0 filesrc location=./input.y8 blocksize=2073600  ! rawvideoparse use-sink-caps=false width=1920 height=1080 format=gray8 framerate=60/1 !  vvas_xfilter kernels-config=otsu-accelarator.json ! queue  !  vvas_xfilter kernels-config=preprocess-accelarator-stride.json ! queue  ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 ! perf !  kmssink bus-id=fd4a0000.display -v`
-
-* File In - File Out
-
-   `gst-launch-1.0 filesrc location=./input.y8 blocksize=2073600  ! rawvideoparse use-sink-caps=false width=1920 height=1080 format=gray8 framerate=60/1 !  vvas_xfilter kernels-config=otsu-accelarator.json ! queue  !  vvas_xfilter kernels-config=preprocess-accelarator.json ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 ! perf !   filesink location=out.y8 -v`
-
-* File In - Live Out Demo mode
-
-   `gst-launch-1.0 filesrc location=./input.y8 blocksize=2073600  ! rawvideoparse use-sink-caps=false width=1920 height=1080 format=gray8 framerate=4/1 !  vvas_xfilter kernels-config=otsu-accelarator.json ! queue  !  vvas_xfilter kernels-config=preprocess-accelarator-stride.json ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=4/1 ! perf !  kmssink bus-id=fd4a0000.display -v`
-
-#### For File Input and Final Output
-
-* File In - Live Out
-
-  `gst-launch-1.0 filesrc location=./input.y8 blocksize=2073600  ! rawvideoparse use-sink-caps=false width=1920 height=1080 format=gray8 framerate=60/1 !  vvas_xfilter kernels-config=otsu-accelarator.json ! queue  !  vvas_xfilter kernels-config=preprocess-accelarator-stride.json ! queue  ! vvas_xfilter kernels-config=cca-accelarator.json ! queue ! vvas_xfilter kernels-config=text2overlay.json ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 ! perf !  kmssink bus-id=fd4a0000.display -v`
-
-* File In - File Out
-
-  `gst-launch-1.0 filesrc location=./input.y8 blocksize=2073600  ! rawvideoparse use-sink-caps=false width=1920 height=1080 format=gray8 framerate=60/1 !  vvas_xfilter kernels-config=otsu-accelarator.json ! queue  !  vvas_xfilter kernels-config=preprocess-accelarator.json ! queue  ! vvas_xfilter kernels-config=cca-accelarator.json ! queue ! vvas_xfilter kernels-config=text2overlay.json ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=60/1 ! perf !   filesink location=out.y8 -v`
-
-* File In - Live Out Demo mode
-
-   `gst-launch-1.0 filesrc location=./input.y8 blocksize=2073600  ! rawvideoparse use-sink-caps=false width=1920 height=1080 format=gray8 framerate=4/1 !  vvas_xfilter kernels-config=otsu-accelarator.json ! queue  !  vvas_xfilter kernels-config=preprocess-accelarator-stride.json ! queue  ! vvas_xfilter kernels-config=cca-accelarator.json ! queue ! vvas_xfilter kernels-config=text2overlay.json ! video/x-raw, width=1920, height=1080, format=GRAY8, framerate=4/1 ! perf !  kmssink bus-id=fd4a0000.display -v`
-
+  ```
+  gst-launch-1.0 filesrc location=./input.rgb blocksize=6220800 ! rawvideoparse use-sink-caps=false width=1920 height=1080 format=rgb framerate=2/1 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/color/otsu-accelarator.json ! queue ! video/x-raw, width=1920, height=1080, format=GRAY8 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/color/preprocess-accelarator.json ! queue ! video/x-raw, width=1920, height=1080, format=NV16 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/color/cca-accelarator.json ! queue ! video/x-raw, width=1920, height=1080, format=GRAY8 ! vvas_xfilter kernels-config=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/color/text2overlay.json ! video/x-raw, width=1920, height=1080, format=GRAY8 ! perf ! filesink location=out.rgb -v
+  ```
 
 ## Next Steps
 
@@ -170,4 +182,4 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
 -->
 
-<p align="center"><sup>Copyright&copy; 2023 Advanced Micro Devices, Inc.</sup></p>
+<p align="center"><sup>Copyright&copy; 2023 - 2024 Advanced Micro Devices, Inc.</sup></p>
