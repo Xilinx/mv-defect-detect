@@ -722,6 +722,8 @@ There are two sets of `json` files present, one set for mono and other for color
 
 ## Next Steps
 
+- [Debug](debug.md)
+- [Known Issues](known_issues.md)
 - [Hardware Architecture of the Platform](10gige.md)
 - [Hardware Architecture of the Accelerator](hw_arch_accel_dd.md)
 - [Software Architecture of the Platform](sw_arch_platform_dd.md)
