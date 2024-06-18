@@ -1,9 +1,15 @@
+<table class="sphinxhide">
+ <tr>
+    <td align="center"><img src="https://raw.githubusercontent.com/Xilinx/Image-Collateral/main/xilinx-logo.png" width="30%"/><h1></h1>
+    </td>
+ </tr>
+</table>
 
 # Development Guide
 
 1. Refer to the [K260 SOM Starter Kit Tutorial](https://xilinx.github.io/kria-apps-docs/main/build/html/docs/build_petalinux.html#build-the-sdk) for building the application.
 
-# Setting up the Board
+## Setting up the Board
 
 1. Get the SD Card Image from [Boot Image Site](http://xilinx.com/) and follow the instructions in UG1089 to burn the SD card. And install the SD card to J11.
 
@@ -76,18 +82,18 @@
           Note: For setups without access to the internet, it is possible to download and use the docker locally. Please refer to the `K260 SOM Starter Kit Tutorial` for instructions.
 
 
-# How to run the application:
+## How to run the application:
 
-## Interacting with the application
+### Interacting with the application
     The application is targeted to run only live and file based inputs.
 
     We assume input to support resolution=1920x1080(width=1920 and height=1080) and format=GRAY8(Y8)
 
 To interact with application, via Command line
 
-### Command Line
+#### Command Line
 
-#### Examples:
+##### Examples:
 
     **Note** Only one instance of the application can run at a time.
 
@@ -125,7 +131,7 @@ To interact with application, via Command line
     mv-defect-detect -o 2
     **Note**  Final output will be displayed on DP.
 
-#### Command Options:
+##### Command Options:
 
 The examples show the capability of the mv-defect-detect for specific configurations. User can get more and detailed application options as following by invoking
 demomode is supported for DP out only. demomode is not supported for file sink.
@@ -152,7 +158,7 @@ Application Options:
   -c, --cfgpath=/opt/xilinx/xlnx-app-kr260-mv-defect-detect/share/vvas/     JSON config file path
 ```
 
-# Files structure
+## Files structure
 
 * The application is installed as:
 
@@ -172,4 +178,8 @@ Application Options:
         | preprocess-accelarator-stride.json | Config of pre-process accelarator with stride.        |
         | text2overlay.json                  | Config of text2overlay.                               |
 
-<p align="center"><sup>Copyright&copy; 2022, Advanced Micro Devices, Inc.</sup></p>
+<hr class="sphinxhide"></hr>
+
+<p class="sphinxhide" align="center"><sub>Copyright © 2022–2024 Advanced Micro Devices, Inc.</sub></p>
+
+<p class="sphinxhide" align="center"><sup><a href="https://www.amd.com/en/corporate/copyright">Terms and Conditions</a></sup></p>

@@ -1,6 +1,6 @@
-<table>
+﻿<table>
  <tr>
-   <td align="center"><img src="https://www.xilinx.com/content/dam/xilinx/imgs/press/media-kits/corporate/xilinx-logo.png" width="30%"/><h1>Kria&trade; KR260 Robotics Starter Kit</h1>
+   <td align="center"><img src="https://raw.githubusercontent.com/Xilinx/Image-Collateral/main/xilinx-logo.png" width="30%"/><h1>Kria&trade; KR260 Robotics Starter Kit</h1>
    </td>
  </tr>
  <tr>
@@ -38,8 +38,8 @@ paramaters. There are two separate sets of configuration files, one set for the 
 the other set for the color sensor. The content of the files is identical except for the xclbin
 path which is different depending on the sensor used. The below conifguration file snippets are
 based on the mono sensor variants.
-
-A common VVAS user meta data structure is defined [here](../../defect-detect/src/vvas_dd_meta.h).
+\10gige_vision_camera\docs
+A common VVAS user meta data structure is defined [here](../../10gige_vision_camera/docs/vvas_dd_meta.h).
 It is used to exchange data between the individual kernels in the defect detect pipeline and
 consists if the following fields:
 
@@ -373,16 +373,10 @@ For more information [see](https://docs.opencv.org/3.4/d0/de1/group__core.html#g
 * Go back to the [Hardware Architecture of the Accelerator](hw_arch_accel_dd.md)
 * Go back to the [Software Architecture of the Platform](sw_arch_platform_dd.md)
 
-<!---
 
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
+<hr class="sphinxhide"></hr>
 
-You may obtain a copy of the License at
-[http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+<p class="sphinxhide" align="center"><sub>Copyright © 2023–2024 Advanced Micro Devices, Inc.</sub></p>
 
+<p class="sphinxhide" align="center"><sup><a href="https://www.amd.com/en/corporate/copyright">Terms and Conditions</a></sup></p>
 
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
-
--->
-
-<p align="center">Copyright&copy; 2023 - 2024 Advanced Micro Devices, Inc.</p>
