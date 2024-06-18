@@ -1,4 +1,4 @@
-<table>
+﻿<table class="sphinxhide">
  <tr>
    <td align="center"><img src="https://raw.githubusercontent.com/Xilinx/Image-Collateral/main/xilinx-logo.png" width="30%"/><h1>Kria&trade; KR260 Robotics Starter Kit</h1>
    </td>
