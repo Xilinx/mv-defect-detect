@@ -94,17 +94,29 @@ echo "Check the media graph for 1920x1080p & formats"
 echo "\n"
 media-ctl -d ${media} -p
 
-# Tune the sensor parameters for better image quality
+# Tune the sensor parameters to default v4l2 tuning parameters which are set to 
+# work for defect detection lighting conditions
+# For other use purposes and different lighting conditions users can later tune 
+# using the v4l2 commands or qv4l2 utility
 echo "Run v4l2 commands to tune the sensor parameters for better image quality"
 echo "\n"
 if [ "${fmt}" = "mono" ]; then
-  v4l2-ctl -d /dev/video0 -c black_level=50
-  v4l2-ctl -d /dev/video0 -c exposure=400
+  v4l2-ctl -d /dev/video0 -c black_level=7
+  v4l2-ctl -d /dev/video0 -c exposure=450
   v4l2-ctl -d /dev/video0 -c gain=250
+  v4l2-ctl -d /dev/video0 -c mono_luma_gain=90
 elif [ "${fmt}" = "color" ]; then
-  v4l2-ctl -d /dev/video0 -c black_level=50
-  v4l2-ctl -d /dev/video0 -c exposure=5000
-  v4l2-ctl -d /dev/video0 -c gain=300
+  v4l2-ctl -d /dev/video0 -c black_level=2
+  v4l2-ctl -d /dev/video0 -c exposure=15000
+  v4l2-ctl -d /dev/video0 -c gain=100
+  v4l2-ctl -d /dev/video0 -c red_gain=300
+  v4l2-ctl -d /dev/video0 -c blue_gain=350
+  v4l2-ctl -d /dev/video0 -c green_gain=150
+  v4l2-ctl -d /dev/video0 -c awb_threshold=512
+  v4l2-ctl -d /dev/video0 -c red_gamma=15
+  v4l2-ctl -d /dev/video0 -c blue_gamma=20
+  v4l2-ctl -d /dev/video0 -c green_gamma=15
+  v4l2-ctl -d /dev/video0 -c select_ccm=8
 fi
 v4l2-ctl -d /dev/video0 -l
 
