@@ -131,7 +131,7 @@ Testing was performed with the following artifacts:
 | Boot Firmware                       | K26-BootFW-01.01 |
 | Linux Kernel                        | 5.15.0-1030      |
 | xlnx-firmware-kr260-mv-camera-mono  | 0.12-0xlnx1      |
-| xlnx-firmware-kr260-mv-camera-color | 0.12-0xlnx1      |
+| xlnx-firmware-kr260-mv-camera-color | 0.12-0xlnx2      |
 
 ### Host Machine Setup
 
@@ -187,7 +187,7 @@ Install the latest application packages.
 * Pull the latest docker image for mv-defect-detect using the following command.
 
   ```bash
-    sudo docker pull xilinx/mv-defect-detect:2022.1
+    sudo docker pull xilinx/mv-defect-detect:2022.2
   ```
 
 * Find the images installed with the following command:
