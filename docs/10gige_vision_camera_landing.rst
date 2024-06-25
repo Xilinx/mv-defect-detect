@@ -10,7 +10,7 @@ Overview
 .. toctree::
    :maxdepth: 1
 
-   Overview <docs/overview>
+   Overview <src/overview>
 
 *******************************
 Introduction
@@ -19,7 +19,7 @@ Introduction
 .. toctree::
    :maxdepth: 1
 
-   Introduction <docs/introduction>
+   Introduction <src/introduction>
 
 Features
 ================================
@@ -40,7 +40,7 @@ Quick Start
    :maxdepth: 1
 
    KR260 Starter Kit Linux Boot <../kria_starterkit_linux_boot>
-   Setting up the Board and Application deployment <docs/app_deployment>
+   Setting up the Board and Application deployment <src/app_deployment>
 
 
 ***************************
@@ -67,10 +67,10 @@ Architecture
 .. toctree::
    :maxdepth: 1
 
-   Hardware Architecture of the Platform <docs/10gige>
-   Hardware Architecture of the Accelerator <docs/hw_arch_accel_dd>
-   Software Architecture of the Platform <docs/sw_arch_platform_dd>
-   Software Architecture of the Accelerator <docs/sw_arch_accel_dd>
+   Hardware Architecture of the Platform <src/10gige>
+   Hardware Architecture of the Accelerator <src/hw_arch_accel_dd>
+   Software Architecture of the Platform <src/sw_arch_platform_dd>
+   Software Architecture of the Accelerator <src/sw_arch_accel_dd>
 
 
 *******************************
@@ -92,8 +92,8 @@ Other
 .. toctree::
    :maxdepth: 1
 
-   Debugging <docs/debug>
-   Known Issues & Limitations <docs/known_issues>
+   Debugging <src/debug>
+   Known Issues & Limitations <src/known_issues>
 
 
 Xilinx Support
