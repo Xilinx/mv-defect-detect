@@ -39,7 +39,7 @@ the other set for the color sensor. The content of the files is identical except
 path which is different depending on the sensor used. The below conifguration file snippets are
 based on the mono sensor variants.
 \10gige_vision_camera\docs
-A common VVAS user meta data structure is defined [here](../../10gige_vision_camera/docs/vvas_dd_meta.h).
+A common VVAS user meta data structure is defined [here](https://github.com/Xilinx/mv-defect-detect/blob/master/defect-detect/src/vvas_dd_meta.h).
 It is used to exchange data between the individual kernels in the defect detect pipeline and
 consists if the following fields:
 
